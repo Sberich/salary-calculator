@@ -211,14 +211,14 @@ function safeSetStorage(key, val) {
 }
 
 // ==========================================================================
-// 3. Application State & Formatters
+// 3. Application State & Formatters (ค่าเริ่มต้น: ครูชำนาญการ คศ.2 เงินเดือนเต็มขั้นล่าง 30,200 บ.)
 // ==========================================================================
 const savedTheme = safeGetStorage('teacher_salary_theme', 'warm');
 const validTheme = ['warm', 'nordic'].includes(savedTheme) ? savedTheme : 'warm';
 
 const state = {
-  rankKey: 'k3',
-  salary: 42000,
+  rankKey: 'k2',
+  salary: 30200,
   percent: 3.0,
   annualMode: false,
   annualR1: 3.0,

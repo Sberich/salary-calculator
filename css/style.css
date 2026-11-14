@@ -193,6 +193,7 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.01em;
+  white-space: nowrap !important;
 }
 
 .nature-badge {
@@ -202,11 +203,16 @@ body {
   color: var(--accent-primary);
   padding: 2px 8px;
   border-radius: var(--radius-full);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .brand-desc {
   font-size: 0.8rem;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-tools {
@@ -302,6 +308,8 @@ body {
   padding: 3px 12px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.25);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .hero-pill-bracket {
@@ -315,6 +323,8 @@ body {
   padding: 3px 10px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(56, 189, 248, 0.35);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .hero-number-wrap {
@@ -322,6 +332,7 @@ body {
   align-items: baseline;
   gap: 8px;
   margin: 10px 0 12px 0;
+  white-space: nowrap;
 }
 
 .currency-symbol {
@@ -330,6 +341,7 @@ body {
   font-weight: 600;
   color: var(--hero-text-sub);
   opacity: 0.9;
+  white-space: nowrap !important;
 }
 
 .hero-grand-number {
@@ -339,12 +351,14 @@ body {
   color: var(--hero-grand-num);
   line-height: 1;
   letter-spacing: -0.02em;
+  white-space: nowrap !important;
 }
 
 .hero-unit {
   font-size: 0.95rem;
   color: var(--hero-text-sub);
   font-weight: 500;
+  white-space: nowrap !important;
 }
 
 .hero-increment-chip {
@@ -356,6 +370,7 @@ body {
   border-radius: var(--radius-full);
   font-size: 0.825rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap !important;
 }
 
 .chip-spark {
@@ -407,6 +422,7 @@ body {
   font-size: 1.05rem;
   font-weight: 700;
   color: #FFFFFF;
+  white-space: nowrap !important;
 }
 
 .mini-metric-divider {
@@ -485,6 +501,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-surface-elevated);
@@ -494,10 +511,12 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .card-head-icon {
   font-size: 1.15rem;
+  flex-shrink: 0;
 }
 
 .card-heading {
@@ -505,6 +524,7 @@ body {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
+  white-space: nowrap !important;
 }
 
 .card-head-badge {
@@ -514,6 +534,8 @@ body {
   background: var(--bg-surface-subtle);
   padding: 2px 8px;
   border-radius: var(--radius-full);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .card-body {
@@ -565,6 +587,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 10px 14px;
   background: var(--bg-input);
   border: 1.5px solid var(--border-subtle);
@@ -585,6 +608,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .rank-badge-emerald {
@@ -595,6 +621,8 @@ body {
   color: #FFFFFF;
   padding: 3px 8px;
   border-radius: var(--radius-sm);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .rank-title-text {
@@ -602,12 +630,16 @@ body {
   font-size: 0.925rem;
   font-weight: 600;
   color: var(--text-primary);
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rank-trigger-sub {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0 !important;
 }
 
 .rank-allowance-tag {
@@ -617,10 +649,13 @@ body {
   background: var(--accent-subtle);
   padding: 3px 8px;
   border-radius: var(--radius-full);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .trigger-chevron {
   color: var(--text-muted);
+  flex-shrink: 0 !important;
 }
 
 .field-hint {
@@ -912,6 +947,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 9px 12px;
   border-radius: var(--radius-sm);
   background: var(--bg-surface-elevated);
@@ -924,13 +960,18 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .ledger-value {
   font-family: var(--font-mono);
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .ledger-row.highlight-green {
@@ -941,12 +982,15 @@ body {
 .ledger-row.highlight-green .ledger-label {
   color: var(--accent-pine);
   font-weight: 600;
+  white-space: nowrap !important;
 }
 
 .ledger-value.highlight-num {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--accent-primary);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .flow-indicator {
@@ -1162,6 +1206,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .option-pill {
@@ -1172,6 +1217,8 @@ body {
   color: #FFFFFF;
   padding: 3px 8px;
   border-radius: var(--radius-sm);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .option-title {
@@ -1179,17 +1226,21 @@ body {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
+  white-space: nowrap !important;
 }
 
 .option-meta {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0 !important;
 }
 
 .option-allowance {
   font-size: 0.8rem;
   color: var(--text-muted);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .rank-option-item.active .option-allowance {
@@ -1323,30 +1374,109 @@ body {
 
 @media (max-width: 640px) {
   .app-container {
-    padding: 14px 12px 60px 12px;
+    padding: 12px 10px 50px 10px;
+  }
+  .nature-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    gap: 8px;
+  }
+  .brand-group {
+    gap: 8px;
+    min-width: 0;
+  }
+  .brand-emblem {
+    width: 36px;
+    height: 36px;
+  }
+  .brand-heading {
+    font-size: 1.15rem !important;
+  }
+  .nature-badge {
+    font-size: 0.675rem;
+    padding: 1px 6px;
+  }
+  .brand-desc {
+    font-size: 0.725rem;
   }
   .hero-stream-banner {
-    padding: 18px 16px;
+    padding: 16px 14px;
     border-radius: var(--radius-md);
+    margin-bottom: 14px;
   }
   .hero-grand-number {
-    font-size: 2.2rem;
+    font-size: 2.15rem;
   }
   .currency-symbol {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+  .hero-pill-rank, .hero-pill-bracket {
+    font-size: 0.775rem;
+    padding: 2px 8px;
+  }
+  .hero-increment-chip {
+    font-size: 0.775rem;
+    padding: 4px 10px;
+  }
+  .metric-glass-box {
+    padding: 10px 12px;
+  }
+  .mini-label {
+    font-size: 0.725rem;
+  }
+  .mini-value {
+    font-size: 0.95rem;
+  }
+  .card-head {
+    padding: 12px 12px;
+  }
+  .card-heading {
+    font-size: 0.95rem !important;
+  }
+  .card-head-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
   }
   .card-body {
-    padding: 14px;
+    padding: 12px 10px;
+  }
+  .nature-rank-trigger {
+    padding: 8px 10px;
+  }
+  .rank-badge-emerald {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+  .rank-title-text {
+    font-size: 0.85rem;
+  }
+  .rank-allowance-tag {
+    font-size: 0.75rem;
+    padding: 2px 6px;
   }
   .nature-input-currency {
     font-size: 1.2rem;
+    padding: 8px 45px 8px 10px;
+  }
+  .ledger-row {
+    padding: 8px 10px;
+    font-size: 0.825rem;
+  }
+  .ledger-label {
+    font-size: 0.8rem !important;
+  }
+  .ledger-value {
+    font-size: 0.825rem !important;
+  }
+  .ledger-value.highlight-num {
+    font-size: 0.95rem !important;
   }
   .btn-text {
     display: none;
   }
   .tool-btn {
-    padding: 6px 10px;
-    min-height: 34px;
+    padding: 6px 8px;
+    min-height: 32px;
   }
 
   /* Bottom sheet on mobile */
