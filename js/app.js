@@ -1186,7 +1186,9 @@ function setupPWA() {
   // 1. ลงทะเบียน Service Worker เมื่อรันบน HTTPS หรือ Localhost
   if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
+        reg.update().catch(() => {});
+      }).catch(() => {});
     });
   }
 
