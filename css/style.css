@@ -515,6 +515,8 @@ body {
   align-items: center;
   gap: 8px;
   min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .card-head-icon {
@@ -550,14 +552,17 @@ body {
 
 .params-summary-badge {
   font-family: var(--font-heading);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--accent-primary);
   background: var(--accent-subtle);
   border: 1px solid var(--border-strong);
-  padding: 3px 8px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
   white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
 }
 
 .card-toggle-pill {
@@ -1256,6 +1261,8 @@ body {
   background: var(--bg-surface-elevated);
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 0;
+  gap: 8px;
 }
 
 .rank-option-item:hover {
@@ -1271,8 +1278,10 @@ body {
 .option-main {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .option-pill {
@@ -1293,12 +1302,14 @@ body {
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .option-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0 !important;
 }
 

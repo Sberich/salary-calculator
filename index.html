@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ธาราคำนวณ • ระบบจำลองเงินเดือนข้าราชการครู (ก.ค.ศ.)</title>
-  <meta name="description" content="ระบบจำลองและวางแผนเงินเดือนครู เกณฑ์ ก.ค.ศ. ว 20/2561 ฉบับพงไพรและธาราธรรมชาติ">
+  <title>ธาราคำนวณ • คำนวณเงินเดือนข้าราชการครู (ก.ค.ศ.)</title>
+  <meta name="description" content="โปรแกรมประมาณการและวางแผนเงินเดือนครู เกณฑ์ ก.ค.ศ. ว 20/2561 ฉบับพงไพรและธาราธรรมชาติ">
   <meta name="theme-color" content="#F3F7F5" id="metaThemeColor">
   
   <!-- ป้องกัน Theme Flash (FOUC) ก่อน Render -->
@@ -68,7 +68,7 @@
 
     <!-- 2. Hero Panorama Vista: แผงภาพรวมผลลัพธ์สายน้ำ (Riverflow Banner) -->
     <!-- แทนที่สลิปใบเสร็จเดิม ด้วยแผงภาพรวมที่สง่างามสไตล์ผืนป่าธรรมชาติ -->
-    <section class="hero-stream-banner" aria-label="สรุปผลการจำลองเงินเดือน">
+    <section class="hero-stream-banner" aria-label="สรุปผลประมาณการเงินเดือน">
       <div class="hero-water-decor" aria-hidden="true"></div>
 
       <div class="hero-main-content">
@@ -136,12 +136,11 @@
           <div class="card-head-title">
             <span class="card-head-icon" aria-hidden="true">🌲</span>
             <h2 id="sectionParamsTitle" class="card-heading">ข้อมูลการประเมิน</h2>
+            <!-- ป้ายสรุปย่อแสดงเมื่อกดพับซ่อน แทนที่หัวข้อ -->
+            <span id="paramsSummaryBadge" class="params-summary-badge" style="display: none;">คศ. 2 • 30,200 บ. • 3.0%</span>
           </div>
           
           <div class="card-head-actions">
-            <!-- ป้ายสรุปย่อแสดงเมื่อกดพับซ่อน -->
-            <span id="paramsSummaryBadge" class="params-summary-badge" style="display: none;">คศ. 2 • 30,200 บ. • 3.0%</span>
-            
             <button type="button" id="btnToggleParams" class="card-toggle-pill" aria-label="สลับการแสดงข้อมูลการประเมิน">
               <span id="paramsToggleText" class="toggle-text">ซ่อน</span>
               <span id="paramsToggleIcon" class="toggle-icon" aria-hidden="true">▲</span>
@@ -174,8 +173,8 @@
 
             <!-- Hidden Native Select (Fallback & State) -->
             <select id="rankSelect" class="visually-hidden" aria-hidden="true" tabindex="-1">
-              <option value="assistant">ครูผู้ช่วย (แรกบรรจุ)</option>
-              <option value="k1">คศ. 1 (ครูผู้สอน)</option>
+              <option value="assistant">ครูผู้ช่วย</option>
+              <option value="k1">ครู คศ. 1</option>
               <option value="k2" selected>คศ. 2 (ชำนาญการ • +3,500 บ.)</option>
               <option value="k3">คศ. 3 (ชำนาญการพิเศษ • +11,200 บ.)</option>
               <option value="k4">คศ. 4 (เชี่ยวชาญ • +19,800 บ.)</option>
@@ -385,8 +384,7 @@
 
     <!-- Footer -->
     <footer class="nature-footer">
-      <p>ระบบจำลองประมาณการเงินเดือนข้าราชการครู • อ้างอิงตามหนังสือ ก.ค.ศ. ที่ ศธ 0206.7/ว 20</p>
-      <p class="copyright">พัฒนาด้วยใจเพื่อคุณครูไทย • พร้อมใช้งานออฟไลน์และติดตั้งบนหน้าจอได้</p>
+      <p class="footer-legal">ประมาณการเงินเดือนข้าราชการครูและบุคลากรทางการศึกษา • อ้างอิงตามหนังสือ ก.ค.ศ. ที่ ศธ 0206.7/ว 20 และ ว 8/2567</p>
     </footer>
 
     <!-- Hidden Canvas สำหรับสร้างรูปภาพสลิปความละเอียดสูง (2x Retina) -->
@@ -409,10 +407,10 @@
             <div class="rank-option-item rank-sheet-item" data-rank="assistant" role="option">
               <div class="option-main">
                 <span class="option-pill">ครูผู้ช่วย</span>
-                <span class="option-title">ครูผู้ช่วย (แรกบรรจุ)</span>
+                <span class="option-title">ครูผู้ช่วย</span>
               </div>
               <div class="option-meta">
-                <span class="option-allowance">ไม่มีเงินประจำตำแหน่ง</span>
+                <span class="option-allowance">ไม่มีวิทยฐานะ</span>
                 <span class="option-check" aria-hidden="true">✓</span>
               </div>
             </div>
@@ -421,10 +419,10 @@
             <div class="rank-option-item rank-sheet-item" data-rank="k1" role="option">
               <div class="option-main">
                 <span class="option-pill">คศ. 1</span>
-                <span class="option-title">ครู คศ. 1 (ครูผู้สอน)</span>
+                <span class="option-title">ครู คศ. 1</span>
               </div>
               <div class="option-meta">
-                <span class="option-allowance">ไม่มีเงินประจำตำแหน่ง</span>
+                <span class="option-allowance">ไม่มีวิทยฐานะ</span>
                 <span class="option-check" aria-hidden="true">✓</span>
               </div>
             </div>
@@ -514,7 +512,7 @@
                 <tr>
                   <td><strong>ครูผู้ช่วย</strong></td>
                   <td>แรกบรรจุ</td>
-                  <td>15,050 – 24,750</td>
+                  <td>15,050 – 24,750 *</td>
                   <td>19,910</td>
                   <td>17,480</td>
                   <td>22,330</td>
@@ -570,8 +568,13 @@
           </div>
 
           <div class="criteria-callout">
-            <strong>ข้อสังเกตสำคัญ:</strong>
+            <strong>ข้อสังเกตและเกณฑ์การปรับเงินเดือนใหม่:</strong>
             <ul>
+              <li><strong>* อัตราเงินเดือนแรกบรรจุ ครูผู้ช่วย (ตามหนังสือ ก.ค.ศ. ว 8/2567):</strong>
+                <br>• <em>1 พ.ค. 2567:</em> ป.ตรี 4 ปี = 16,560 บ. | ป.ตรี 5 ปี = 17,380 บ.
+                <br>• <em>1 พ.ค. 2568:</em> ป.ตรี 4 ปี = 18,220 บ. | ป.ตรี 5 ปี = 19,120 บ.
+                <br><em>(หมายเหตุ: ตัวเลข 15,050 บ. ในตารางเป็นเพดานขั้นต่ำสุดตามบัญชี ว 20/2561)</em>
+              </li>
               <li>หากเงินเดือนปัจจุบัน <strong>ต่ำกว่าจุดตัด</strong> จะใช้ฐานช่วงล่างในการคำนวณ</li>
               <li>หากเงินเดือนปัจจุบัน <strong>เท่ากับหรือสูงกว่าจุดตัด</strong> จะใช้ฐานช่วงบนในการคำนวณ</li>
               <li>การปัดเศษ: คำนวณ <code>ฐาน × ร้อยละ</code> แล้วปัดเศษขึ้นเป็นจำนวนเต็มสิบบาทเสมอ</li>
@@ -593,7 +596,7 @@
         </div>
         <div class="modal-body text-center">
           <div class="preview-img-container">
-            <img id="modalPreviewImg" src="" alt="ภาพสลิปจำลองเงินเดือนครู">
+            <img id="modalPreviewImg" src="" alt="ภาพสรุปประมาณการเงินเดือนครู">
           </div>
           <div class="image-modal-actions">
             <button type="button" id="btnModalDownloadDirect" class="action-btn-nature primary">

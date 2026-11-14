@@ -371,6 +371,7 @@ function toggleParams(force) {
   const toggleText = document.getElementById('paramsToggleText');
   const toggleIcon = document.getElementById('paramsToggleIcon');
   const badge = document.getElementById('paramsSummaryBadge');
+  const titleEl = document.getElementById('sectionParamsTitle');
   if (!body) return;
 
   const willCollapse = typeof force === 'boolean' ? !force : !body.classList.contains('collapsed');
@@ -380,9 +381,10 @@ function toggleParams(force) {
     if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
     if (toggleText) toggleText.textContent = 'ปรับข้อมูล';
     if (toggleIcon) toggleIcon.textContent = '▼';
+    if (titleEl) titleEl.style.display = 'none';
     if (badge) {
       updateParamsSummaryBadge();
-      badge.style.display = 'inline-block';
+      badge.style.display = 'inline-flex';
     }
   } else {
     body.classList.remove('collapsed');
@@ -390,6 +392,7 @@ function toggleParams(force) {
     if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
     if (toggleText) toggleText.textContent = 'ซ่อน';
     if (toggleIcon) toggleIcon.textContent = '▲';
+    if (titleEl) titleEl.style.display = '';
     if (badge) badge.style.display = 'none';
   }
 }
