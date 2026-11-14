@@ -7,6 +7,9 @@ test('verify HTML structure and element presence', () => {
 
   // Check critical interactive elements
   const requiredElements = [
+    'id="rankPickerBtn"',
+    'id="rankSheetModal"',
+    'id="btnCloseRankSheet"',
     'id="rankSelect"',
     'id="salaryInput"',
     'id="percentSlider"',
@@ -23,16 +26,32 @@ test('verify HTML structure and element presence', () => {
     'id="btnCloseImageModal"',
     'id="btnModalDownloadDirect"',
     'id="btnModalShare"',
-    'id="toastNotice"'
+    'id="toastNotice"',
+    'id="btnInstallApp"',
+    'id="heroIncrement"',
+    'id="slipIncrement"',
+    'id="heroNewBase"',
+    'id="slipNewBase"',
+    'id="heroTotalAllowance"',
+    'id="slipTotalAllowance"',
+    'id="bracketIcon"',
+    'id="bracketText"'
   ];
 
   for (const elem of requiredElements) {
     assert.ok(html.includes(elem), `index.html must include ${elem}`);
   }
 
-  // Check that quick chips are 2.5, 3.0, 3.5
+  // Check PWA tags
+  assert.ok(html.includes('rel="manifest"'), 'must include manifest link');
+  assert.ok(html.includes('apple-mobile-web-app-capable'), 'must include apple-mobile-web-app-capable');
+  assert.ok(html.includes('mobile-web-app-capable'), 'must include mobile-web-app-capable');
+
+  // Check that quick chips are 2.5, 2.9, 3.0, 3.2, 3.5
   assert.ok(html.includes('data-val="2.5"'));
+  assert.ok(html.includes('data-val="2.9"'));
   assert.ok(html.includes('data-val="3.0"'));
+  assert.ok(html.includes('data-val="3.2"'));
   assert.ok(html.includes('data-val="3.5"'));
   assert.ok(!html.includes('data-val="4.0"'), '4.0% chip should be removed for minimalism');
   assert.ok(!html.includes('data-val="2.0"'), '2.0% chip should be removed for minimalism');

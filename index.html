@@ -22,7 +22,13 @@
   </script>
 
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ธาราคำนวณ">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png">
 </head>
 <body>
 
@@ -52,6 +58,12 @@
       </div>
       
       <div class="header-tools">
+        <!-- ปุ่มติดตั้งแอป (PWA Standalone เต็มจอไร้แถบ URL) -->
+        <button type="button" id="btnInstallApp" class="tool-btn install-btn" title="ติดตั้งแอปบนมือถือ (เต็มจอไร้แถบ URL)">
+          <span class="btn-icon">📲</span>
+          <span class="btn-text">ติดตั้งแอป</span>
+        </button>
+
         <!-- ปุ่มเปิดตารางเกณฑ์ -->
         <button type="button" id="btnOpenCriteria" class="tool-btn" title="ดูตารางเกณฑ์ ก.ค.ศ. (ว 20/2561)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
@@ -79,8 +91,8 @@
             <div class="hero-tags">
               <span id="slipRankTitle" class="hero-pill-rank">คศ. 2 ครูชำนาญการ</span>
               <span id="bracketBadge" class="hero-pill-bracket">
-                <span class="droplet-dot" aria-hidden="true">💧</span>
-                <span id="bracketText">ช่วงล่าง</span>
+                <span class="droplet-dot" aria-hidden="true" id="bracketIcon">🌱</span>
+                <span id="bracketText">ฐานล่าง</span>
               </span>
             </div>
           </div>
@@ -94,7 +106,7 @@
           <div class="hero-increment-chip">
             <span class="chip-spark">▲</span>
             <span>เงินเลื่อนรอบนี้:</span>
-            <strong id="slipIncrement">+910.00 บ.</strong>
+            <strong id="heroIncrement">+910.00 บ.</strong>
             <span class="percent-tag">(<span id="slipPercent">3.00</span>%)</span>
           </div>
         </div>
@@ -104,12 +116,12 @@
           <div class="metric-glass-box">
             <div class="mini-metric-item">
               <span class="mini-label">เงินเดือนใหม่</span>
-              <strong class="mini-value" id="slipNewBase">31,110.00 บ.</strong>
+              <strong class="mini-value" id="heroNewBase">31,110.00 บ.</strong>
             </div>
             <div class="mini-metric-divider" aria-hidden="true"></div>
             <div class="mini-metric-item">
               <span class="mini-label">รวมเงินวิทยฐานะ</span>
-              <strong class="mini-value" id="slipTotalAllowance">3,500.00 บ.</strong>
+              <strong class="mini-value" id="heroTotalAllowance">3,500.00 บ.</strong>
             </div>
           </div>
 
@@ -314,7 +326,7 @@
 
             <div class="ledger-row highlight-green">
               <span class="ledger-label">
-                <span class="flow-indicator" aria-hidden="true">💧</span>
+                <span class="flow-indicator" aria-hidden="true" id="ledgerIncIcon">🌱</span>
                 <span>เงินที่ได้เลื่อนขั้น</span>
               </span>
               <span class="ledger-value highlight-num" id="slipIncrement">+910.00 บ.</span>

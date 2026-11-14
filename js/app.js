@@ -228,6 +228,50 @@ const state = {
   activeShareBlob: null
 };
 
+const STORAGE_KEY_SAVED_STATE = 'teacher_salary_saved_state';
+
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SAVED_STATE);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && typeof data === 'object') {
+      if (data.rankKey && SALARY_CRITERIA[data.rankKey]) {
+        state.rankKey = data.rankKey;
+      }
+      if (typeof data.salary === 'number' && data.salary > 0) {
+        state.salary = data.salary;
+      }
+      if (typeof data.percent === 'number' && data.percent >= 0.5 && data.percent <= 6.0) {
+        state.percent = data.percent;
+      }
+      if (typeof data.annualMode === 'boolean') {
+        state.annualMode = data.annualMode;
+      }
+      if (typeof data.annualR1 === 'number' && data.annualR1 >= 0 && data.annualR1 <= 6.0) {
+        state.annualR1 = data.annualR1;
+      }
+      if (typeof data.annualR2 === 'number' && data.annualR2 >= 0 && data.annualR2 <= 6.0) {
+        state.annualR2 = data.annualR2;
+      }
+    }
+  } catch (e) {}
+}
+
+function saveStateToStorage() {
+  try {
+    const payload = {
+      rankKey: state.rankKey,
+      salary: state.salary,
+      percent: state.percent,
+      annualMode: state.annualMode,
+      annualR1: state.annualR1,
+      annualR2: state.annualR2
+    };
+    localStorage.setItem(STORAGE_KEY_SAVED_STATE, JSON.stringify(payload));
+  } catch (e) {}
+}
+
 const currencyFormatter = new Intl.NumberFormat('th-TH', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2
@@ -432,23 +476,30 @@ function recalculate() {
   });
   state.lastResult = result;
 
-  // 3. ปรับฐานและแท็กช่วงบน/ล่าง
+  // 3. ปรับฐานและแท็กฐานบน/ฐานล่าง
   const baseSalaryDisplay = document.getElementById('baseSalaryDisplay');
   const bracketBadge = document.getElementById('bracketBadge');
   const bracketText = document.getElementById('bracketText');
+  const bracketIcon = document.getElementById('bracketIcon');
+  const ledgerIncIcon = document.getElementById('ledgerIncIcon');
 
   if (baseSalaryDisplay) baseSalaryDisplay.textContent = formatCurrency(result.baseSalary, 0);
   if (bracketBadge && bracketText) {
     if (result.isUpper) {
-      bracketBadge.className = 'badge-tag upper';
-      bracketText.textContent = 'ช่วงบน';
+      bracketBadge.className = 'hero-pill-bracket upper';
+      bracketText.textContent = 'ฐานบน';
+      if (bracketIcon) bracketIcon.textContent = '⛰️';
     } else {
-      bracketBadge.className = 'badge-tag lower';
-      bracketText.textContent = 'ช่วงล่าง';
+      bracketBadge.className = 'hero-pill-bracket lower';
+      bracketText.textContent = 'ฐานล่าง';
+      if (bracketIcon) bracketIcon.textContent = '🌱';
     }
   }
+  if (ledgerIncIcon) {
+    ledgerIncIcon.textContent = result.isUpper ? '⛰️' : '🌱';
+  }
 
-  // 4. อัปเดตข้อมูลบนสลิป
+  // 4. อัปเดตข้อมูลบนสลิปและโครงสร้างรายรับ (อัปเดตพร้อมกันทั้งแผงสรุปและบัญชีแจกแจง)
   const setEl = (id, text) => {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
@@ -457,8 +508,18 @@ function recalculate() {
   setEl('slipRankTitle', `${result.rankName} ${result.rankTitle}`);
   setEl('slipBase', `${formatCurrency(result.baseSalary)} บ.`);
   setEl('slipPercent', state.percent.toFixed(2));
-  setEl('slipIncrement', `+${formatCurrency(result.roundedIncrease)} บ.`);
-  setEl('slipNewBase', `${formatCurrency(result.newSalaryBase)} บ.`);
+
+  const incFormatted = `+${formatCurrency(result.roundedIncrease)} บ.`;
+  setEl('slipIncrement', incFormatted);
+  setEl('heroIncrement', incFormatted);
+
+  const newBaseFormatted = `${formatCurrency(result.newSalaryBase)} บ.`;
+  setEl('slipNewBase', newBaseFormatted);
+  setEl('heroNewBase', newBaseFormatted);
+
+  const totalAllowFormatted = `${formatCurrency(result.totalAllowance)} บ.`;
+  setEl('slipTotalAllowance', totalAllowFormatted);
+  setEl('heroTotalAllowance', totalAllowFormatted);
 
   const slipCappedRow = document.getElementById('slipCappedRow');
   if (slipCappedRow) {
@@ -472,12 +533,14 @@ function recalculate() {
 
   setEl('slipAllowance', `${formatCurrency(result.allowance)} บ.`);
   setEl('slipSpecial', `${formatCurrency(result.special)} บ.`);
-  setEl('slipTotalAllowance', `${formatCurrency(result.totalAllowance)} บ.`);
 
   const slipGrandTotal = document.getElementById('slipGrandTotal');
   if (slipGrandTotal) {
     animateNumber(slipGrandTotal, result.grandTotal);
   }
+
+  // บันทึกสถานะล่าสุดลงเครื่องผู้ใช้ (LocalStorage)
+  saveStateToStorage();
 
   // 5. จำลองผลทั้งปี 2 รอบ
   if (state.annualMode) {
@@ -786,7 +849,7 @@ function copySummaryToClipboard() {
   text += `─────────────────────\n`;
   text += `• อันดับ / วิทยฐานะ: ${res.rankName} ${res.rankTitle}\n`;
   text += `• เงินเดือนเดิม: ${formatCurrency(res.currentSalary)} บ.\n`;
-  text += `• ฐานคำนวณ: ${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})\n`;
+  text += `• ฐานคำนวณ: ${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ฐานบน' : 'ฐานล่าง'})\n`;
   text += `• ร้อยละที่เลื่อน: ${res.percent.toFixed(2)}%\n`;
   text += `• เงินที่ได้เลื่อน: +${formatCurrency(res.roundedIncrease)} บ.\n`;
   text += `• เงินเดือนใหม่: ${formatCurrency(res.newSalaryBase)} บ.\n`;
@@ -954,7 +1017,7 @@ async function handleExportImage() {
     y += 44;
   }
 
-  drawRow('ฐานคำนวณ:', `${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})`);
+  drawRow('ฐานคำนวณ:', `${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ฐานบน' : 'ฐานล่าง'})`);
   drawRow(`▲ เงินเลื่อนขั้น (${res.percent.toFixed(2)}%):`, `+${formatCurrency(res.roundedIncrease)} บ.`, true);
 
   // เส้นแบ่งสายน้ำ
@@ -1106,13 +1169,105 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.closePath();
 }
 
+let deferredPrompt = null;
+function setupPWA() {
+  // 1. ลงทะเบียน Service Worker เมื่อรันบน HTTPS หรือ Localhost
+  if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+
+  // 2. ดักจับ beforeinstallprompt เพื่อเชื่อมปุ่มติดตั้งแอป
+  const btnInstall = document.getElementById('btnInstallApp');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  if (btnInstall) {
+    btnInstall.onclick = async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          showToast('ติดตั้งแอปธาราคำนวณเรียบร้อยแล้ว');
+        }
+        deferredPrompt = null;
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          showToast('บน iPhone/iPad: แตะปุ่มแชร์ ⎋ แล้วเลือก "เพิ่มไปยังหน้าจอโฮม" เพื่อเปิดแอปเต็มจอ');
+        } else {
+          showToast('บน Android Chrome: แตะเมนู ⋮ (3 จุด) ที่มุมบนขวา แล้วเลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
+        }
+      }
+    };
+  }
+}
+
 // ==========================================================================
 // 10. Initialization
 // ==========================================================================
 function init() {
+  // 1. โหลดข้อมูลเดิมล่าสุดที่เคยบันทึกไว้ในเครื่อง
+  loadSavedState();
+
+  // 2. ตั้งค่าธีม
   applyTheme(state.theme);
+
+  // 3. ซิงค์ค่า UI ให้ตรงกับ state ที่กู้คืนมา
+  const salaryInput = document.getElementById('salaryInput');
+  if (salaryInput) {
+    salaryInput.value = formatCurrency(state.salary, 0);
+  }
+
+  const percentSlider = document.getElementById('percentSlider');
+  if (percentSlider) {
+    percentSlider.value = state.percent;
+  }
+
+  const percentInput = document.getElementById('percentInput');
+  if (percentInput) {
+    percentInput.value = state.percent.toFixed(2);
+  }
+
+  const chips = document.querySelectorAll('.chip-btn');
+  chips.forEach(chip => {
+    const val = parseFloat(chip.dataset.val);
+    if (Math.abs(val - state.percent) < 0.001) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+
+  const modeSingleBtn = document.getElementById('modeSingleBtn');
+  const modeAnnualBtn = document.getElementById('modeAnnualBtn');
+  const annualControls = document.getElementById('annualControls');
+  const annualSummarySection = document.getElementById('annualSummarySection');
+  if (modeSingleBtn && modeAnnualBtn) {
+    if (state.annualMode) {
+      modeAnnualBtn.classList.add('active');
+      modeSingleBtn.classList.remove('active');
+      if (annualControls) annualControls.classList.add('active');
+      if (annualSummarySection) annualSummarySection.style.display = 'block';
+    } else {
+      modeSingleBtn.classList.add('active');
+      modeAnnualBtn.classList.remove('active');
+      if (annualControls) annualControls.classList.remove('active');
+      if (annualSummarySection) annualSummarySection.style.display = 'none';
+    }
+  }
+
+  const rankSelect = document.getElementById('rankSelect');
+  if (rankSelect) {
+    rankSelect.value = state.rankKey;
+  }
+
   updateRankPickerUI(state.rankKey);
   setupEventListeners();
+  setupPWA();
   recalculate();
 }
 

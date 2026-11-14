@@ -240,6 +240,17 @@ body {
   border-color: var(--border-strong);
 }
 
+.install-btn {
+  background: var(--accent-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-pine);
+}
+
+.install-btn:hover {
+  background: var(--accent-primary);
+  color: #FFFFFF;
+}
+
 /* ==========================================================================
    2. Hero Panorama Vista: แผงภาพรวมผลลัพธ์สายน้ำ (Riverflow Banner)
    ========================================================================== */
