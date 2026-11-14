@@ -477,6 +477,18 @@ function recalculate() {
   state.lastResult = result;
 
   // 3. ปรับฐานและแท็กฐานบน/ฐานล่าง
+  const BRACKET_ICONS = {
+    // ฐานบน: ยอดเขาสูงสง่า (Mountain Summit Peak)
+    upper: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"></path></svg>`,
+    // ฐานล่าง: ลำธารสายน้ำธรรมชาติ (Natural River Wave)
+    lower: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c3-2 6-2 9 0s6 2 9 0"></path><path d="M2 17c3-2 6-2 9 0s6 2 9 0"></path></svg>`
+  };
+
+  const LEDGER_INC_ICONS = {
+    upper: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`,
+    lower: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`
+  };
+
   const baseSalaryDisplay = document.getElementById('baseSalaryDisplay');
   const bracketBadge = document.getElementById('bracketBadge');
   const bracketText = document.getElementById('bracketText');
@@ -488,15 +500,15 @@ function recalculate() {
     if (result.isUpper) {
       bracketBadge.className = 'hero-pill-bracket upper';
       bracketText.textContent = 'ฐานบน';
-      if (bracketIcon) bracketIcon.textContent = '⛰️';
+      if (bracketIcon) bracketIcon.innerHTML = BRACKET_ICONS.upper;
     } else {
       bracketBadge.className = 'hero-pill-bracket lower';
       bracketText.textContent = 'ฐานล่าง';
-      if (bracketIcon) bracketIcon.textContent = '🌱';
+      if (bracketIcon) bracketIcon.innerHTML = BRACKET_ICONS.lower;
     }
   }
   if (ledgerIncIcon) {
-    ledgerIncIcon.textContent = result.isUpper ? '⛰️' : '🌱';
+    ledgerIncIcon.innerHTML = result.isUpper ? LEDGER_INC_ICONS.upper : LEDGER_INC_ICONS.lower;
   }
 
   // 4. อัปเดตข้อมูลบนสลิปและโครงสร้างรายรับ (อัปเดตพร้อมกันทั้งแผงสรุปและบัญชีแจกแจง)

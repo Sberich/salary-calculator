@@ -318,16 +318,34 @@ body {
 .hero-pill-bracket {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.775rem;
+  gap: 5px;
+  font-size: 0.85rem;
   font-weight: 600;
-  background: rgba(56, 189, 248, 0.22);
-  color: #E0F2FE;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
+  letter-spacing: 0.01em;
+}
+
+.hero-pill-bracket.upper {
+  color: #6EE7B7 !important; /* เขียวมรกตยอดเขาสว่าง คมชัด */
+}
+
+.hero-pill-bracket.lower {
+  color: #93C5FD !important; /* ฟ้าครามสายน้ำธรรมชาติ นุ่มนวล ชัดเจน */
+}
+
+.bracket-icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bracket-icon-box svg {
+  display: block;
 }
 
 .hero-number-wrap {
@@ -1495,9 +1513,15 @@ body {
   .currency-symbol {
     font-size: 1.4rem;
   }
-  .hero-pill-rank, .hero-pill-bracket {
+  .hero-pill-rank {
     font-size: 0.775rem;
     padding: 2px 8px;
+  }
+  .hero-pill-bracket {
+    font-size: 0.825rem;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
   }
   .hero-increment-chip {
     font-size: 0.775rem;
