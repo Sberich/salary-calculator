@@ -1,17 +1,221 @@
 /**
  * app.js
- * Controller สำหรับจัดการ State, Event Listeners, Animation และการ Export ภาพ
+ * Controller ระบบคำนวณเงินเดือนครู (Standalone - ทำงานได้ทันทีทั้งบน file:// และ Web Server)
  */
 
-import {
-  SALARY_CRITERIA,
-  calculateSalaryResult,
-  simulateAnnualIncrements
-} from './salary-rules.js';
+// ==========================================================================
+// 1. Core Salary Rules & Criteria (ก.ค.ศ. ว 20/2561)
+// ==========================================================================
+const SALARY_CRITERIA = {
+  k5: {
+    key: 'k5',
+    name: 'คศ. 5',
+    title: 'ครูเชี่ยวชาญพิเศษ',
+    minSalary: 29980,
+    maxSalary: 76800,
+    cutOff: 60840,
+    baseHigh: 68560,
+    baseLow: 60830,
+    allowance: 15600,
+    special: 15600,
+    badge: 'เชี่ยวชาญพิเศษ'
+  },
+  k4: {
+    key: 'k4',
+    name: 'คศ. 4',
+    title: 'ครูเชี่ยวชาญ',
+    minSalary: 24400,
+    maxSalary: 69040,
+    cutOff: 50330,
+    baseHigh: 59630,
+    baseLow: 50320,
+    allowance: 9900,
+    special: 9900,
+    badge: 'เชี่ยวชาญ'
+  },
+  k3: {
+    key: 'k3',
+    name: 'คศ. 3',
+    title: 'ครูชำนาญการพิเศษ',
+    minSalary: 19860,
+    maxSalary: 58390,
+    cutOff: 40280,
+    baseHigh: 49330,
+    baseLow: 37200,
+    allowance: 5600,
+    special: 5600,
+    badge: 'ชำนาญการพิเศษ'
+  },
+  k2: {
+    key: 'k2',
+    name: 'คศ. 2',
+    title: 'ครูชำนาญการ',
+    minSalary: 16190,
+    maxSalary: 41620,
+    cutOff: 30210,
+    baseHigh: 35270,
+    baseLow: 30200,
+    allowance: 3500,
+    special: 0,
+    badge: 'ชำนาญการ'
+  },
+  k1: {
+    key: 'k1',
+    name: 'คศ. 1',
+    title: 'ครู คศ. 1',
+    minSalary: 15440,
+    maxSalary: 34310,
+    cutOff: 24890,
+    baseHigh: 29600,
+    baseLow: 22780,
+    allowance: 0,
+    special: 0,
+    badge: 'ครูผู้สอน'
+  },
+  assistant: {
+    key: 'assistant',
+    name: 'ครูผู้ช่วย',
+    title: 'ครูผู้ช่วย',
+    minSalary: 15050,
+    maxSalary: 24750,
+    cutOff: 19910,
+    baseHigh: 22330,
+    baseLow: 17480,
+    allowance: 0,
+    special: 0,
+    badge: 'แรกเริ่ม'
+  }
+};
+
+function checkSalaryBounds(rankKey, salary) {
+  const criteria = SALARY_CRITERIA[rankKey];
+  if (!criteria) return { isValid: true, warning: null };
+
+  const num = typeof salary === 'number' ? salary : 0;
+  const isBelowMin = num < criteria.minSalary;
+  const isAboveMax = num > criteria.maxSalary;
+
+  let warning = null;
+  if (isBelowMin) {
+    warning = `เงินเดือนต่ำกว่าขั้นต่ำของ ${criteria.name} (${criteria.minSalary.toLocaleString()} บ.)`;
+  } else if (isAboveMax) {
+    warning = `เงินเดือนสูงกว่าเพดานของ ${criteria.name} (${criteria.maxSalary.toLocaleString()} บ.)`;
+  }
+
+  return {
+    isValid: !isBelowMin && !isAboveMax,
+    minSalary: criteria.minSalary,
+    maxSalary: criteria.maxSalary,
+    warning
+  };
+}
+
+function getCalculationBase(rankKey, currentSalary) {
+  const criteria = SALARY_CRITERIA[rankKey];
+  if (!criteria) return { base: 0, isUpper: false, cutOff: 0 };
+  const isUpper = currentSalary >= criteria.cutOff;
+  return {
+    base: isUpper ? criteria.baseHigh : criteria.baseLow,
+    isUpper,
+    cutOff: criteria.cutOff
+  };
+}
+
+function calculateIncrement(baseSalary, percent) {
+  const safePercent = Math.max(0, Math.min(6.0, Number(percent) || 0));
+  const rawIncrease = Math.round(((baseSalary * safePercent) / 100) * 100) / 100;
+  const roundedIncrease = Math.ceil(rawIncrease / 10) * 10;
+  return { safePercent, rawIncrease, roundedIncrease };
+}
+
+function calculateSalaryResult({ rankKey, currentSalary, percent }) {
+  const criteria = SALARY_CRITERIA[rankKey];
+  if (!criteria) return null;
+
+  const bounds = checkSalaryBounds(rankKey, currentSalary);
+  const { base: baseSalary, isUpper, cutOff } = getCalculationBase(rankKey, currentSalary);
+  const { safePercent, rawIncrease, roundedIncrease } = calculateIncrement(baseSalary, percent);
+
+  const rawNewSalary = currentSalary + roundedIncrease;
+  const isCapped = rawNewSalary > criteria.maxSalary;
+  const newSalaryBase = isCapped ? criteria.maxSalary : rawNewSalary;
+  const spilloverCompensation = isCapped ? rawNewSalary - criteria.maxSalary : 0;
+
+  const allowance = criteria.allowance;
+  const special = criteria.special;
+  const totalAllowance = allowance + special;
+  const grandTotal = newSalaryBase + totalAllowance + spilloverCompensation;
+
+  return {
+    rankKey,
+    rankName: criteria.name,
+    rankTitle: criteria.title,
+    currentSalary,
+    percent: safePercent,
+    baseSalary,
+    isUpper,
+    cutOff,
+    minSalary: criteria.minSalary,
+    maxSalary: criteria.maxSalary,
+    boundsWarning: bounds.warning,
+    rawIncrease,
+    roundedIncrease,
+    newSalaryBase,
+    isCapped,
+    spilloverCompensation,
+    allowance,
+    special,
+    totalAllowance,
+    grandTotal
+  };
+}
+
+function simulateAnnualIncrements({ rankKey, startingSalary, percentRound1, percentRound2 }) {
+  const round1 = calculateSalaryResult({
+    rankKey,
+    currentSalary: startingSalary,
+    percent: percentRound1
+  });
+  const round2 = calculateSalaryResult({
+    rankKey,
+    currentSalary: round1.newSalaryBase,
+    percent: percentRound2
+  });
+  return {
+    rankKey,
+    startingSalary,
+    round1,
+    round2,
+    annualIncrease: round1.roundedIncrease + round2.roundedIncrease,
+    finalSalaryBase: round2.newSalaryBase,
+    finalGrandTotal: round2.grandTotal
+  };
+}
 
 // ==========================================================================
-// Application State
+// 2. Safe Storage Utility
 // ==========================================================================
+function safeGetStorage(key, fallback) {
+  try {
+    const val = localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, val) {
+  try {
+    localStorage.setItem(key, val);
+  } catch (e) {}
+}
+
+// ==========================================================================
+// 3. Application State & Formatters
+// ==========================================================================
+const savedTheme = safeGetStorage('teacher_salary_theme', 'warm');
+const validTheme = ['warm', 'nordic'].includes(savedTheme) ? savedTheme : 'warm';
+
 const state = {
   rankKey: 'k3',
   salary: 42000,
@@ -19,110 +223,130 @@ const state = {
   annualMode: false,
   annualR1: 3.0,
   annualR2: 3.0,
-  theme: localStorage.getItem('teacher_salary_theme') || 'warm',
-  lastResult: null
+  theme: validTheme,
+  lastResult: null,
+  activeShareBlob: null
 };
 
-// ==========================================================================
-// DOM Elements
-// ==========================================================================
-const DOM = {
-  html: document.documentElement,
-  themeBtn: document.getElementById('themeToggleBtn'),
-  themeIcon: document.getElementById('themeIcon'),
-  themeLabel: document.getElementById('themeLabel'),
-  
-  rankCards: document.querySelectorAll('.rank-card'),
-  salaryInput: document.getElementById('salaryInput'),
-  baseSalaryDisplay: document.getElementById('baseSalaryDisplay'),
-  bracketBadge: document.getElementById('bracketBadge'),
-  bracketText: document.getElementById('bracketText'),
+const currencyFormatter = new Intl.NumberFormat('th-TH', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
 
-  chips: document.querySelectorAll('.chip-btn'),
-  percentSlider: document.getElementById('percentSlider'),
-  percentInput: document.getElementById('percentInput'),
+const integerFormatter = new Intl.NumberFormat('th-TH', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
+});
 
-  modeSingleBtn: document.getElementById('modeSingleBtn'),
-  modeAnnualBtn: document.getElementById('modeAnnualBtn'),
-  annualControls: document.getElementById('annualControls'),
-  annualR1Input: document.getElementById('annualR1Input'),
-  annualR2Input: document.getElementById('annualR2Input'),
-  annualSummarySection: document.getElementById('annualSummarySection'),
-
-  // Payslip Displays
-  slipRankTitle: document.getElementById('slipRankTitle'),
-  slipBase: document.getElementById('slipBase'),
-  slipPercent: document.getElementById('slipPercent'),
-  slipIncrement: document.getElementById('slipIncrement'),
-  slipNewBase: document.getElementById('slipNewBase'),
-  slipAllowance: document.getElementById('slipAllowance'),
-  slipSpecial: document.getElementById('slipSpecial'),
-  slipTotalAllowance: document.getElementById('slipTotalAllowance'),
-  slipGrandTotal: document.getElementById('slipGrandTotal'),
-
-  slipAnnualR1: document.getElementById('slipAnnualR1'),
-  slipAnnualR2: document.getElementById('slipAnnualR2'),
-  slipAnnualTotalInc: document.getElementById('slipAnnualTotalInc'),
-
-  // Buttons & Toast
-  btnExportImage: document.getElementById('btnExportImage'),
-  btnCopySummary: document.getElementById('btnCopySummary'),
-  toastNotice: document.getElementById('toastNotice'),
-  exportCanvas: document.getElementById('exportCanvas')
-};
-
-// ==========================================================================
-// Formatters & Utility Functions
-// ==========================================================================
 function formatCurrency(num, decimals = 2) {
   if (isNaN(num)) return '0.00';
-  return num.toLocaleString('th-TH', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  });
+  return decimals === 0 ? integerFormatter.format(num) : currencyFormatter.format(num);
 }
 
-function parseCurrency(str) {
-  if (!str) return 0;
-  const cleaned = String(str).replace(/[^0-9.]/g, '');
-  const val = parseFloat(cleaned);
-  return isNaN(val) ? 0 : val;
-}
-
+// Toast Timer reference
+let toastTimer = null;
 function showToast(msg) {
-  DOM.toastNotice.textContent = msg;
-  DOM.toastNotice.classList.add('show');
-  setTimeout(() => {
-    DOM.toastNotice.classList.remove('show');
+  const toast = document.getElementById('toastNotice');
+  if (!toast) return;
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
   }, 2400);
 }
 
 // ==========================================================================
-// Theme Management
+// 4. Number Ticker Animation
+// ==========================================================================
+const animatedValues = new Map();
+
+function animateNumber(element, targetNum) {
+  if (!element) return;
+  const currentNum = animatedValues.get(element) ?? targetNum;
+  if (Math.abs(currentNum - targetNum) < 1) {
+    element.textContent = formatCurrency(targetNum);
+    animatedValues.set(element, targetNum);
+    return;
+  }
+
+  const duration = 200;
+  const startTime = performance.now();
+
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = currentNum + (targetNum - currentNum) * ease;
+    element.textContent = formatCurrency(val);
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      element.textContent = formatCurrency(targetNum);
+      animatedValues.set(element, targetNum);
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+// ==========================================================================
+// 5. Theme Management
 // ==========================================================================
 function applyTheme(theme) {
-  state.theme = theme;
-  DOM.html.setAttribute('data-theme', theme);
-  localStorage.setItem('teacher_salary_theme', theme);
+  const valid = ['warm', 'nordic'].includes(theme) ? theme : 'warm';
+  state.theme = valid;
+  document.documentElement.setAttribute('data-theme', valid);
+  safeSetStorage('teacher_salary_theme', valid);
 
-  if (theme === 'warm') {
-    DOM.themeIcon.textContent = '☀️';
-    DOM.themeLabel.textContent = 'ธีม: Warm Editorial';
-  } else {
-    DOM.themeIcon.textContent = '🌿';
-    DOM.themeLabel.textContent = 'ธีม: Nordic Mint';
+  const meta = document.getElementById('metaThemeColor');
+  if (meta) {
+    meta.setAttribute('content', valid === 'nordic' ? '#F0F4F8' : '#FAF7F2');
+  }
+
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (icon && label) {
+    if (valid === 'warm') {
+      icon.textContent = '☀️';
+      label.textContent = 'Warm';
+    } else {
+      icon.textContent = '🌿';
+      label.textContent = 'Nordic';
+    }
   }
 }
 
 function toggleTheme() {
-  const nextTheme = state.theme === 'warm' ? 'nordic' : 'warm';
-  applyTheme(nextTheme);
+  applyTheme(state.theme === 'warm' ? 'nordic' : 'warm');
 }
 
 // ==========================================================================
-// Reactive Calculation & UI Update
+// 6. Reactive Calculation
 // ==========================================================================
 function recalculate() {
+  const criteria = SALARY_CRITERIA[state.rankKey];
+  if (!criteria) return;
+
+  // 1. ตรวจสอบเพดานเงินเดือน
+  const bounds = checkSalaryBounds(state.rankKey, state.salary);
+  const warnBanner = document.getElementById('salaryWarningBanner');
+  const warnText = document.getElementById('salaryWarningText');
+  if (warnBanner && warnText) {
+    if (bounds.warning) {
+      warnBanner.style.display = 'flex';
+      warnText.textContent = bounds.warning;
+    } else {
+      warnBanner.style.display = 'none';
+    }
+  }
+
+  const boundInfo = document.getElementById('rankBoundInfo');
+  if (boundInfo) {
+    boundInfo.textContent = `เพดาน: ${criteria.minSalary.toLocaleString()} – ${criteria.maxSalary.toLocaleString()} บ.`;
+  }
+
+  // 2. คำนวณผลลัพธ์
   const result = calculateSalaryResult({
     rankKey: state.rankKey,
     currentSalary: state.salary,
@@ -130,30 +354,54 @@ function recalculate() {
   });
   state.lastResult = result;
 
-  // 1. Update Base & Bracket
-  DOM.baseSalaryDisplay.textContent = formatCurrency(result.baseSalary, 0);
-  if (result.isUpper) {
-    DOM.bracketBadge.className = 'badge-tag upper';
-    DOM.bracketText.textContent = `ช่วงบน (>= ${result.cutOff.toLocaleString()} บ.)`;
-  } else {
-    DOM.bracketBadge.className = 'badge-tag lower';
-    DOM.bracketText.textContent = `ช่วงล่าง (< ${result.cutOff.toLocaleString()} บ.)`;
+  // 3. ปรับฐานและแท็กช่วงบน/ล่าง
+  const baseSalaryDisplay = document.getElementById('baseSalaryDisplay');
+  const bracketBadge = document.getElementById('bracketBadge');
+  const bracketText = document.getElementById('bracketText');
+
+  if (baseSalaryDisplay) baseSalaryDisplay.textContent = formatCurrency(result.baseSalary, 0);
+  if (bracketBadge && bracketText) {
+    if (result.isUpper) {
+      bracketBadge.className = 'badge-tag upper';
+      bracketText.textContent = 'ช่วงบน';
+    } else {
+      bracketBadge.className = 'badge-tag lower';
+      bracketText.textContent = 'ช่วงล่าง';
+    }
   }
 
-  // 2. Update Payslip Rows
-  DOM.slipRankTitle.textContent = `${result.rankTitle} (${result.rankName})`;
-  DOM.slipBase.textContent = `${formatCurrency(result.baseSalary)} บ.`;
-  DOM.slipPercent.textContent = state.percent.toFixed(2);
-  DOM.slipIncrement.textContent = `+${formatCurrency(result.roundedIncrease)} บ.`;
-  DOM.slipNewBase.textContent = `${formatCurrency(result.newSalaryBase)} บ.`;
-  DOM.slipAllowance.textContent = `${formatCurrency(result.allowance)} บ.`;
-  DOM.slipSpecial.textContent = `${formatCurrency(result.special)} บ.`;
-  DOM.slipTotalAllowance.textContent = `${formatCurrency(result.totalAllowance)} บ.`;
+  // 4. อัปเดตข้อมูลบนสลิป
+  const setEl = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
 
-  // Grand Total Ticker
-  DOM.slipGrandTotal.textContent = formatCurrency(result.grandTotal);
+  setEl('slipRankTitle', `${result.rankName} ${result.rankTitle}`);
+  setEl('slipBase', `${formatCurrency(result.baseSalary)} บ.`);
+  setEl('slipPercent', state.percent.toFixed(2));
+  setEl('slipIncrement', `+${formatCurrency(result.roundedIncrease)} บ.`);
+  setEl('slipNewBase', `${formatCurrency(result.newSalaryBase)} บ.`);
 
-  // 3. Annual Simulation if enabled
+  const slipCappedRow = document.getElementById('slipCappedRow');
+  if (slipCappedRow) {
+    if (result.isCapped) {
+      slipCappedRow.style.display = 'flex';
+      setEl('slipSpillover', `+${formatCurrency(result.spilloverCompensation)} บ.`);
+    } else {
+      slipCappedRow.style.display = 'none';
+    }
+  }
+
+  setEl('slipAllowance', `${formatCurrency(result.allowance)} บ.`);
+  setEl('slipSpecial', `${formatCurrency(result.special)} บ.`);
+  setEl('slipTotalAllowance', `${formatCurrency(result.totalAllowance)} บ.`);
+
+  const slipGrandTotal = document.getElementById('slipGrandTotal');
+  if (slipGrandTotal) {
+    animateNumber(slipGrandTotal, result.grandTotal);
+  }
+
+  // 5. จำลองผลทั้งปี 2 รอบ
   if (state.annualMode) {
     const annual = simulateAnnualIncrements({
       rankKey: state.rankKey,
@@ -161,166 +409,252 @@ function recalculate() {
       percentRound1: state.annualR1,
       percentRound2: state.annualR2
     });
-    DOM.slipAnnualR1.textContent = `${formatCurrency(annual.round1.newSalaryBase)} บ.`;
-    DOM.slipAnnualR2.textContent = `${formatCurrency(annual.round2.newSalaryBase)} บ.`;
-    DOM.slipAnnualTotalInc.textContent = `+${formatCurrency(annual.annualIncrease)} บ.`;
+    setEl('slipAnnualR1', `${formatCurrency(annual.round1.newSalaryBase)} บ.`);
+    setEl('slipAnnualR2', `${formatCurrency(annual.round2.newSalaryBase)} บ.`);
+    setEl('slipAnnualTotalInc', `+${formatCurrency(annual.annualIncrease)} บ.`);
   }
 }
 
 // ==========================================================================
-// Event Listeners Setup
+// 7. Event Listeners (ตรวจทานทุกปุ่มและเมนู 100%)
 // ==========================================================================
 function setupEventListeners() {
-  // Theme Switcher
-  DOM.themeBtn.addEventListener('click', toggleTheme);
+  // สลับธีมสี
+  const themeBtn = document.getElementById('themeToggleBtn');
+  if (themeBtn) {
+    themeBtn.onclick = toggleTheme;
+  }
 
-  // Rank Cards Selection
-  DOM.rankCards.forEach(card => {
-    const handleSelect = () => {
-      DOM.rankCards.forEach(c => {
-        c.classList.remove('active');
-        c.setAttribute('aria-checked', 'false');
-      });
-      card.classList.add('active');
-      card.setAttribute('aria-checked', 'true');
-      state.rankKey = card.dataset.rank;
+  // เปิด-ปิด ตารางเกณฑ์ ก.ค.ศ.
+  const btnOpenCriteria = document.getElementById('btnOpenCriteria');
+  const criteriaModal = document.getElementById('criteriaModal');
+  const btnCloseCriteria = document.getElementById('btnCloseCriteria');
+
+  if (btnOpenCriteria && criteriaModal) {
+    btnOpenCriteria.onclick = () => {
+      criteriaModal.style.display = 'flex';
+    };
+  }
+  if (btnCloseCriteria && criteriaModal) {
+    btnCloseCriteria.onclick = () => {
+      criteriaModal.style.display = 'none';
+    };
+  }
+  if (criteriaModal) {
+    criteriaModal.onclick = (e) => {
+      if (e.target === criteriaModal) {
+        criteriaModal.style.display = 'none';
+      }
+    };
+  }
+
+  // ดรอปดาวน์เลือกวิทยฐานะ
+  const rankSelect = document.getElementById('rankSelect');
+  if (rankSelect) {
+    rankSelect.onchange = (e) => {
+      state.rankKey = e.target.value;
       recalculate();
     };
+  }
 
-    card.addEventListener('click', handleSelect);
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleSelect();
-      }
-    });
-  });
-
-  // Salary Input
-  DOM.salaryInput.addEventListener('input', (e) => {
-    const rawVal = e.target.value.replace(/[^0-9]/g, '');
-    const num = parseInt(rawVal, 10) || 0;
-    state.salary = num;
-    recalculate();
-  });
-
-  DOM.salaryInput.addEventListener('blur', (e) => {
-    e.target.value = formatCurrency(state.salary, 0);
-  });
-
-  DOM.salaryInput.addEventListener('focus', (e) => {
-    if (state.salary > 0) {
-      e.target.value = state.salary;
-    }
-  });
-
-  // Quick Chips Selection
-  DOM.chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      DOM.chips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const val = parseFloat(chip.dataset.val);
-      state.percent = val;
-      DOM.percentSlider.value = val;
-      DOM.percentInput.value = val.toFixed(2);
+  // ช่องกรอกเงินเดือน
+  const salaryInput = document.getElementById('salaryInput');
+  if (salaryInput) {
+    salaryInput.oninput = (e) => {
+      const rawVal = e.target.value.replace(/[^0-9]/g, '');
+      const num = parseInt(rawVal, 10) || 0;
+      state.salary = num;
       recalculate();
-    });
-  });
+    };
+    salaryInput.onblur = (e) => {
+      e.target.value = formatCurrency(state.salary, 0);
+    };
+    salaryInput.onfocus = (e) => {
+      if (state.salary > 0) {
+        e.target.value = state.salary;
+      }
+    };
+  }
 
-  // Range Slider
-  DOM.percentSlider.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    state.percent = val;
-    DOM.percentInput.value = val.toFixed(2);
-    updateChipActiveState(val);
-    recalculate();
-  });
+  // ปุ่มลัดร้อยละ (2.5%, 3.0%, 3.5%)
+  const chips = document.querySelectorAll('.chip-btn');
+  const percentSlider = document.getElementById('percentSlider');
+  const percentInput = document.getElementById('percentInput');
+  const annualR1Input = document.getElementById('annualR1Input');
+  const annualR2Input = document.getElementById('annualR2Input');
 
-  // Percent Numeric Input
-  DOM.percentInput.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value) || 0;
-    state.percent = val;
-    DOM.percentSlider.value = val;
-    updateChipActiveState(val);
-    recalculate();
-  });
+  function setPercentage(val) {
+    const clamped = Math.max(0, Math.min(6.0, Math.round(val * 100) / 100));
+    state.percent = clamped;
+    state.annualR1 = clamped;
 
-  function updateChipActiveState(val) {
-    DOM.chips.forEach(c => {
+    if (percentSlider) percentSlider.value = clamped;
+    if (percentInput) percentInput.value = clamped.toFixed(2);
+    if (annualR1Input) annualR1Input.value = clamped.toFixed(2);
+
+    chips.forEach(c => {
       const chipVal = parseFloat(c.dataset.val);
-      if (Math.abs(chipVal - val) < 0.01) {
+      if (Math.abs(chipVal - clamped) < 0.01) {
         c.classList.add('active');
       } else {
         c.classList.remove('active');
       }
     });
+
+    recalculate();
   }
 
-  // Mode Tabs (Single vs Annual)
-  DOM.modeSingleBtn.addEventListener('click', () => {
-    state.annualMode = false;
-    DOM.modeSingleBtn.classList.add('active');
-    DOM.modeAnnualBtn.classList.remove('active');
-    DOM.annualControls.classList.remove('active');
-    DOM.annualSummarySection.style.display = 'none';
-    recalculate();
+  chips.forEach(chip => {
+    chip.onclick = () => {
+      const val = parseFloat(chip.dataset.val);
+      setPercentage(val);
+    };
   });
 
-  DOM.modeAnnualBtn.addEventListener('click', () => {
-    state.annualMode = true;
-    DOM.modeAnnualBtn.classList.add('active');
-    DOM.modeSingleBtn.classList.remove('active');
-    DOM.annualControls.classList.add('active');
-    DOM.annualSummarySection.style.display = 'block';
-    recalculate();
-  });
+  if (percentSlider) {
+    percentSlider.oninput = (e) => {
+      setPercentage(parseFloat(e.target.value));
+    };
+  }
 
-  DOM.annualR1Input.addEventListener('input', (e) => {
-    state.annualR1 = parseFloat(e.target.value) || 0;
-    recalculate();
-  });
+  if (percentInput) {
+    percentInput.oninput = (e) => {
+      let val = parseFloat(e.target.value);
+      if (isNaN(val)) val = 0;
+      setPercentage(val);
+    };
+  }
 
-  DOM.annualR2Input.addEventListener('input', (e) => {
-    state.annualR2 = parseFloat(e.target.value) || 0;
-    recalculate();
-  });
+  // โหมดรอบเดียว vs ทั้งปี (2 รอบ)
+  const modeSingleBtn = document.getElementById('modeSingleBtn');
+  const modeAnnualBtn = document.getElementById('modeAnnualBtn');
+  const annualControls = document.getElementById('annualControls');
+  const annualSummarySection = document.getElementById('annualSummarySection');
 
-  // Copy Summary Action
-  DOM.btnCopySummary.addEventListener('click', copySummaryToClipboard);
+  if (modeSingleBtn && modeAnnualBtn) {
+    modeSingleBtn.onclick = () => {
+      state.annualMode = false;
+      modeSingleBtn.classList.add('active');
+      modeAnnualBtn.classList.remove('active');
+      if (annualControls) annualControls.classList.remove('active');
+      if (annualSummarySection) annualSummarySection.style.display = 'none';
+      recalculate();
+    };
 
-  // Export Slip Image Action
-  DOM.btnExportImage.addEventListener('click', exportPayslipImage);
+    modeAnnualBtn.onclick = () => {
+      state.annualMode = true;
+      modeAnnualBtn.classList.add('active');
+      modeSingleBtn.classList.remove('active');
+      if (annualControls) annualControls.classList.add('active');
+      if (annualSummarySection) annualSummarySection.style.display = 'block';
+      recalculate();
+    };
+  }
+
+  if (annualR1Input) {
+    annualR1Input.oninput = (e) => {
+      const val = Math.max(0, Math.min(6.0, parseFloat(e.target.value) || 0));
+      state.annualR1 = val;
+      state.percent = val;
+      if (percentSlider) percentSlider.value = val;
+      if (percentInput) percentInput.value = val.toFixed(2);
+      recalculate();
+    };
+  }
+
+  if (annualR2Input) {
+    annualR2Input.oninput = (e) => {
+      const val = Math.max(0, Math.min(6.0, parseFloat(e.target.value) || 0));
+      state.annualR2 = val;
+      recalculate();
+    };
+  }
+
+  // ปุ่มคัดลอกสรุปข้อความ
+  const btnCopySummary = document.getElementById('btnCopySummary');
+  if (btnCopySummary) {
+    btnCopySummary.onclick = copySummaryToClipboard;
+  }
+
+  // ปุ่มบันทึกรูปภาพสลิป
+  const btnExportImage = document.getElementById('btnExportImage');
+  if (btnExportImage) {
+    btnExportImage.onclick = handleExportImage;
+  }
+
+  // หน้าต่างพรีวิวรูปภาพ (Image Modal)
+  const imageModal = document.getElementById('imageModal');
+  const btnCloseImageModal = document.getElementById('btnCloseImageModal');
+  const btnModalDownloadDirect = document.getElementById('btnModalDownloadDirect');
+  const btnModalShare = document.getElementById('btnModalShare');
+
+  if (btnCloseImageModal && imageModal) {
+    btnCloseImageModal.onclick = () => {
+      imageModal.style.display = 'none';
+    };
+  }
+  if (imageModal) {
+    imageModal.onclick = (e) => {
+      if (e.target === imageModal) {
+        imageModal.style.display = 'none';
+      }
+    };
+  }
+
+  if (btnModalDownloadDirect) {
+    btnModalDownloadDirect.onclick = () => {
+      if (state.activeShareBlob) {
+        downloadBlob(state.activeShareBlob);
+      }
+    };
+  }
+
+  if (btnModalShare) {
+    btnModalShare.onclick = async () => {
+      if (state.activeShareBlob && navigator.canShare) {
+        try {
+          const file = new File([state.activeShareBlob], 'teacher-salary-slip.png', { type: 'image/png' });
+          await navigator.share({
+            files: [file],
+            title: 'สลิปประมาณการเงินเดือนครู ก.ค.ศ.'
+          });
+        } catch (err) {}
+      }
+    };
+  }
 }
 
 // ==========================================================================
-// Copy Summary Text
+// 8. Clipboard Copy Logic
 // ==========================================================================
 function copySummaryToClipboard() {
   if (!state.lastResult) return;
   const res = state.lastResult;
   const dateStr = new Date().toLocaleDateString('th-TH', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric'
   });
 
-  let text = `📋 [สรุปผลการคำนวณเงินเดือนครู ก.ค.ศ.]\n`;
-  text += `📅 ข้อมูล ณ วันที่: ${dateStr}\n`;
+  let text = `📋 ประมาณการเงินเดือนครู (${res.rankName})\n`;
+  text += `📅 ณ ${dateStr}\n`;
   text += `─────────────────────\n`;
-  text += `• ตำแหน่ง/วิทยฐานะ: ${res.rankTitle} (${res.rankName})\n`;
-  text += `• เงินเดือนเดิม: ${formatCurrency(res.currentSalary)} บาท\n`;
-  text += `• ฐานที่ใช้คำนวณ: ${formatCurrency(res.baseSalary)} บาท (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})\n`;
-  text += `• ร้อยละที่ได้เลื่อน: ${res.percent.toFixed(2)}%\n`;
-  text += `• เงินเลื่อนขั้นที่ได้เพิ่ม: +${formatCurrency(res.roundedIncrease)} บาท\n`;
-  text += `• เงินเดือนใหม่: ${formatCurrency(res.newSalaryBase)} บาท\n`;
+  text += `• เงินเดือนเดิม: ${formatCurrency(res.currentSalary)} บ.\n`;
+  text += `• ฐานคำนวณ: ${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})\n`;
+  text += `• ร้อยละที่เลื่อน: ${res.percent.toFixed(2)}%\n`;
+  text += `• เงินที่ได้เลื่อน: +${formatCurrency(res.roundedIncrease)} บ.\n`;
+  text += `• เงินเดือนใหม่: ${formatCurrency(res.newSalaryBase)} บ.\n`;
+  if (res.isCapped) {
+    text += `  (*ชนเพดาน ส่วนเกินเป็นค่าตอบแทนพิเศษ: +${formatCurrency(res.spilloverCompensation)} บ.)\n`;
+  }
   if (res.totalAllowance > 0) {
-    text += `• เงินวิทยฐานะ: ${formatCurrency(res.allowance)} บาท\n`;
+    text += `• เงินวิทยฐานะ: ${formatCurrency(res.allowance)} บ.\n`;
     if (res.special > 0) {
-      text += `• ค่าตอบแทนพิเศษ: ${formatCurrency(res.special)} บาท\n`;
+      text += `• ค่าตอบแทนพิเศษ: ${formatCurrency(res.special)} บ.\n`;
     }
   }
   text += `─────────────────────\n`;
-  text += `💰 รวมรายรับสุทธิต่อเดือน: ${formatCurrency(res.grandTotal)} บาท`;
+  text += `💰 รวมรับก่อนหัก: ${formatCurrency(res.grandTotal)} บ./เดือน`;
 
   if (state.annualMode) {
     const annual = simulateAnnualIncrements({
@@ -329,184 +663,287 @@ function copySummaryToClipboard() {
       percentRound1: state.annualR1,
       percentRound2: state.annualR2
     });
-    text += `\n\n📈 [การจำลองเลื่อนขั้นทั้งปี (2 รอบ)]\n`;
-    text += `• หลังรอบ เม.ย. (${state.annualR1}%): ${formatCurrency(annual.round1.newSalaryBase)} บ.\n`;
-    text += `• หลังรอบ ต.ค. (${state.annualR2}%): ${formatCurrency(annual.round2.newSalaryBase)} บ.\n`;
-    text += `• รวมเงินเดือนเพิ่มขึ้นตลอดทั้งปี: +${formatCurrency(annual.annualIncrease)} บ./เดือน`;
+    text += `\n\n📈 [จำลองทั้งปี 2 รอบ]\n`;
+    text += `• เม.ย. (${state.annualR1}%): ${formatCurrency(annual.round1.newSalaryBase)} บ.\n`;
+    text += `• ต.ค. (${state.annualR2}%): ${formatCurrency(annual.round2.newSalaryBase)} บ.\n`;
+    text += `• รวมขึ้นทั้งปี: +${formatCurrency(annual.annualIncrease)} บ.`;
   }
 
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('คัดลอกข้อความสรุปเรียบร้อยแล้ว');
-  }).catch(() => {
-    showToast('เกิดข้อผิดพลาดในการคัดลอก');
-  });
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('คัดลอกสรุปเรียบร้อยแล้ว');
+    }).catch(() => {
+      fallbackCopyText(text);
+    });
+  } else {
+    fallbackCopyText(text);
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    showToast('คัดลอกสรุปเรียบร้อยแล้ว');
+  } catch (err) {
+    showToast('คัดลอกไม่สำเร็จ กรุณาลองใหม่');
+  }
+  document.body.removeChild(textArea);
 }
 
 // ==========================================================================
-// High-Resolution Digital Payslip Image Generator (HTML5 Canvas)
+// 9. High-Res Canvas Generator & Export
 // ==========================================================================
-function exportPayslipImage() {
+async function handleExportImage() {
   if (!state.lastResult) return;
+  showToast('กำลังสร้างรูปสลิป...');
+
+  try {
+    if (document.fonts) {
+      await document.fonts.ready;
+    }
+  } catch (e) {}
+
   const res = state.lastResult;
-  const canvas = DOM.exportCanvas;
+  const canvas = document.getElementById('exportCanvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  // 2x Retina Resolution
-  const width = 840;
-  const height = state.annualMode ? 1040 : 920;
-  canvas.width = width;
-  canvas.height = height;
+  const scale = 2;
+  const logicalWidth = 800;
+  const logicalHeight = state.annualMode ? 980 : 840;
+
+  canvas.width = logicalWidth * scale;
+  canvas.height = logicalHeight * scale;
+  ctx.scale(scale, scale);
 
   const isWarm = state.theme === 'warm';
   const bgColor = isWarm ? '#FAF7F2' : '#F0F4F8';
   const cardColor = '#FFFFFF';
-  const headerBg = isWarm ? '#2B3442' : '#0F172A';
-  const primaryText = isWarm ? '#1C2430' : '#0F172A';
-  const secondaryText = isWarm ? '#576579' : '#475569';
-  const accentColor = isWarm ? '#C26307' : '#059669';
-  const totalNumColor = isWarm ? '#FBBF24' : '#34D399';
+  const headerBg = isWarm ? '#1E293B' : '#0F172A';
+  const primaryText = isWarm ? '#182230' : '#0F172A';
+  const secondaryText = isWarm ? '#4A5568' : '#334155';
+  const accentColor = isWarm ? '#B45309' : '#047857';
+  const totalNumColor = isWarm ? '#F59E0B' : '#10B981';
 
-  // Background
+  // 1. พื้นหลัง
   ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
-  // Outer Card
-  const pad = 40;
-  const cardW = width - (pad * 2);
-  const cardH = height - (pad * 2);
-  const r = 24;
+  // 2. การ์ดสีขาว
+  const pad = 32;
+  const cardW = logicalWidth - (pad * 2);
+  const cardH = logicalHeight - (pad * 2);
+  const r = 20;
 
   ctx.save();
   ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-  ctx.shadowBlur = 30;
-  ctx.shadowOffsetY = 12;
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 6;
   roundRect(ctx, pad, pad, cardW, cardH, r);
   ctx.fillStyle = cardColor;
   ctx.fill();
   ctx.restore();
 
-  // Header Box
+  // 3. หัวสลิป
   ctx.save();
-  ctx.beginPath();
-  roundRect(ctx, pad, pad, cardW, 130, { tl: r, tr: r, br: 0, bl: 0 });
+  roundRect(ctx, pad, pad, cardW, 110, { tl: r, tr: r, br: 0, bl: 0 });
   ctx.fillStyle = headerBg;
   ctx.fill();
 
-  // Header Title
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 32px "Prompt", sans-serif';
-  ctx.fillText(res.rankTitle, pad + 32, pad + 56);
+  ctx.font = 'bold 28px "Prompt", sans-serif';
+  ctx.fillText(`${res.rankName} ${res.rankTitle}`, pad + 28, pad + 48);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-  ctx.font = '20px "Sarabun", sans-serif';
-  ctx.fillText(`สลิปจำลองการเลื่อนเงินเดือนข้าราชการครู (${res.rankName})`, pad + 32, pad + 92);
+  ctx.font = '16px "Sarabun", sans-serif';
+  ctx.fillText(`สลิปประมาณการเงินเดือน • เกณฑ์ ก.ค.ศ.`, pad + 28, pad + 80);
 
-  // Official Seal Badge
+  // ตรา ก.ค.ศ.
   ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-  roundRect(ctx, pad + cardW - 140, pad + 40, 100, 36, 18);
+  roundRect(ctx, pad + cardW - 110, pad + 35, 84, 32, 16);
   ctx.fill();
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 18px "Prompt", sans-serif';
+  ctx.font = 'bold 15px "Prompt", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('ก.ค.ศ.', pad + cardW - 90, pad + 65);
+  ctx.fillText('ก.ค.ศ.', pad + cardW - 68, pad + 56);
   ctx.restore();
 
-  // Card Content
-  let y = pad + 180;
-  const colL = pad + 36;
-  const colR = pad + cardW - 36;
+  // 4. รายการข้อมูล
+  let y = pad + 150;
+  const colL = pad + 28;
+  const colR = pad + cardW - 28;
 
   function drawRow(label, value, isHighlight = false) {
     if (isHighlight) {
-      ctx.fillStyle = isWarm ? '#FEF3E7' : '#ECFDF5';
-      roundRect(ctx, colL - 10, y - 28, cardW - 52, 48, 10);
+      ctx.fillStyle = isWarm ? '#FEF3C7' : '#D1FAE5';
+      roundRect(ctx, colL - 6, y - 24, cardW - 44, 40, 8);
       ctx.fill();
 
       ctx.fillStyle = accentColor;
-      ctx.font = 'bold 22px "Prompt", sans-serif';
+      ctx.font = 'bold 18px "Prompt", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(label, colL, y + 4);
+      ctx.fillText(label, colL, y + 3);
 
-      ctx.font = 'bold 24px "JetBrains Mono", monospace';
+      ctx.font = 'bold 20px "JetBrains Mono", monospace';
       ctx.textAlign = 'right';
-      ctx.fillText(value, colR, y + 4);
+      ctx.fillText(value, colR, y + 3);
     } else {
       ctx.fillStyle = secondaryText;
-      ctx.font = '22px "Sarabun", sans-serif';
+      ctx.font = '18px "Sarabun", sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(label, colL, y);
 
       ctx.fillStyle = primaryText;
-      ctx.font = '600 22px "JetBrains Mono", monospace';
+      ctx.font = '600 18px "JetBrains Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText(value, colR, y);
     }
-    y += 52;
+    y += 44;
   }
 
-  drawRow('ฐานที่ใช้คำนวณ:', `${formatCurrency(res.baseSalary)} บาท (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})`);
-  drawRow(`▲ เงินที่ได้เลื่อนขั้น (${res.percent.toFixed(2)}%):`, `+${formatCurrency(res.roundedIncrease)} บาท`, true);
-  
-  y += 10;
-  // Dashed Divider
-  ctx.strokeStyle = '#D9CEBE';
-  ctx.setLineDash([8, 6]);
+  drawRow('ฐานคำนวณ:', `${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})`);
+  drawRow(`▲ เงินเลื่อนขั้น (${res.percent.toFixed(2)}%):`, `+${formatCurrency(res.roundedIncrease)} บ.`, true);
+
+  // เส้นประคั่น
+  y += 4;
+  ctx.strokeStyle = isWarm ? '#D4C7B5' : '#CBD5E1';
+  ctx.setLineDash([6, 5]);
   ctx.beginPath();
   ctx.moveTo(colL, y);
   ctx.lineTo(colR, y);
   ctx.stroke();
   ctx.setLineDash([]);
-  y += 40;
+  y += 30;
 
-  drawRow('เงินเดือนใหม่ (เลื่อนขั้นแล้ว):', `${formatCurrency(res.newSalaryBase)} บาท`);
-  drawRow('เงินวิทยฐานะ:', `${formatCurrency(res.allowance)} บาท`);
-  drawRow('ค่าตอบแทนพิเศษ:', `${formatCurrency(res.special)} บาท`);
-  drawRow('รวมเงินประจำตำแหน่ง:', `${formatCurrency(res.totalAllowance)} บาท`);
+  drawRow('เงินเดือนใหม่:', `${formatCurrency(res.newSalaryBase)} บ.`);
+  drawRow('เงินวิทยฐานะ:', `${formatCurrency(res.allowance)} บ.`);
+  drawRow('ค่าตอบแทนพิเศษ:', `${formatCurrency(res.special)} บ.`);
+  drawRow('รวมเงินประจำตำแหน่ง:', `${formatCurrency(res.totalAllowance)} บ.`);
 
-  y += 20;
+  y += 12;
 
-  // Grand Total Banner
-  const bannerH = 130;
+  // 5. กล่องยอดรวม
+  const bannerH = 110;
   ctx.save();
-  roundRect(ctx, colL, y, cardW - 72, bannerH, 16);
+  roundRect(ctx, colL, y, cardW - 56, bannerH, 12);
   ctx.fillStyle = headerBg;
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  ctx.font = '18px "Prompt", sans-serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.font = '15px "Prompt", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('รวมรายรับสุทธิโดยประมาณ', width / 2, y + 40);
+  ctx.fillText('รวมรับก่อนหัก (ประมาณการ)', logicalWidth / 2, y + 32);
 
   ctx.fillStyle = totalNumColor;
-  ctx.font = 'bold 44px "JetBrains Mono", monospace';
-  ctx.fillText(`${formatCurrency(res.grandTotal)}`, width / 2, y + 90);
-  ctx.font = '16px "Sarabun", sans-serif';
+  ctx.font = 'bold 36px "JetBrains Mono", monospace';
+  ctx.fillText(`${formatCurrency(res.grandTotal)}`, logicalWidth / 2, y + 72);
+  ctx.font = '13px "Sarabun", sans-serif';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-  ctx.fillText('บาท / เดือน', width / 2, y + 115);
+  ctx.fillText('บาท / เดือน', logicalWidth / 2, y + 94);
   ctx.restore();
 
-  y += bannerH + 40;
+  y += bannerH + 24;
 
-  // Footer inside card
+  // 6. ส่วนข้อมูล 2 รอบถ้าเปิดโหมดไว้
+  if (state.annualMode) {
+    const annual = simulateAnnualIncrements({
+      rankKey: state.rankKey,
+      startingSalary: state.salary,
+      percentRound1: state.annualR1,
+      percentRound2: state.annualR2
+    });
+
+    ctx.fillStyle = isWarm ? '#F6F1EA' : '#E2E8F0';
+    roundRect(ctx, colL, y, cardW - 56, 100, 10);
+    ctx.fill();
+
+    ctx.fillStyle = primaryText;
+    ctx.font = 'bold 15px "Prompt", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('📈 ผลจำลองทั้งปี 2 รอบ:', colL + 14, y + 24);
+
+    ctx.fillStyle = secondaryText;
+    ctx.font = '15px "Sarabun", sans-serif';
+    ctx.fillText(`• เม.ย. (${state.annualR1}%): ${formatCurrency(annual.round1.newSalaryBase)} บ.`, colL + 14, y + 50);
+    ctx.fillText(`• ต.ค. (${state.annualR2}%): ${formatCurrency(annual.round2.newSalaryBase)} บ.`, colL + 14, y + 76);
+
+    ctx.fillStyle = accentColor;
+    ctx.font = 'bold 16px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`รวมทั้งปี +${formatCurrency(annual.annualIncrease)} บ.`, colR - 14, y + 62);
+
+    y += 120;
+  }
+
+  // 7. ท้ายสลิป
   const today = new Date().toLocaleDateString('th-TH', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
-  ctx.fillStyle = '#8E9BAE';
-  ctx.font = '16px "Sarabun", sans-serif';
+  ctx.fillStyle = '#718096';
+  ctx.font = '13px "Sarabun", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`คำนวณ ณ วันที่ ${today} • อ้างอิงตามระเบียบ ก.ค.ศ.`, width / 2, y);
+  ctx.fillText(`ประมาณการ ณ วันที่ ${today} • อ้างอิงเกณฑ์ ก.ค.ศ. (ว 20/2561)`, logicalWidth / 2, y);
 
-  // Trigger Download
-  const link = document.createElement('a');
-  link.download = `สลิปเงินเดือนครู_${res.rankName}_${res.currentSalary}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast('ดาวน์โหลดรูปภาพสลิปเรียบร้อยแล้ว');
+  // ส่งออกรูป
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    state.activeShareBlob = blob;
+
+    // อัปเดตพรีวิวใน Modal เสมอ
+    const url = URL.createObjectURL(blob);
+    const modalImg = document.getElementById('modalPreviewImg');
+    const imageModal = document.getElementById('imageModal');
+    if (modalImg) modalImg.src = url;
+
+    // ถ้าเป็นมือถือและรองรับ Web Share ให้แชร์ตรงทันที
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const file = new File([blob], 'teacher-salary-slip.png', { type: 'image/png' });
+
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({
+        files: [file],
+        title: 'สลิปประมาณการเงินเดือนครู ก.ค.ศ.'
+      }).then(() => {
+        showToast('แชร์รูปสลิปเรียบร้อยแล้ว');
+      }).catch((err) => {
+        if (err.name !== 'AbortError' && imageModal) {
+          imageModal.style.display = 'flex';
+        }
+      });
+      return;
+    }
+
+    // บน Desktop: ทำการดาวน์โหลดไฟล์ตรงทันที
+    downloadBlob(blob);
+    showToast('ดาวน์โหลดรูปสลิปเรียบร้อยแล้ว');
+
+    // ถ้าเป็น In-App browser หรืออุปกรณ์ที่อาจไม่เริ่มดาวน์โหลด ให้เปิด Modal ไว้สำรอง
+    if (isMobile && imageModal) {
+      imageModal.style.display = 'flex';
+    }
+  }, 'image/png');
 }
 
-// Helper: Rounded Rectangle
+function downloadBlob(blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.download = 'teacher-salary-slip.png';
+  a.href = url;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function roundRect(ctx, x, y, width, height, radius) {
   let r = radius;
   if (typeof r === 'number') {
@@ -526,10 +963,16 @@ function roundRect(ctx, x, y, width, height, radius) {
 }
 
 // ==========================================================================
-// Initialization
+// 10. Initialization
 // ==========================================================================
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
   applyTheme(state.theme);
   setupEventListeners();
   recalculate();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

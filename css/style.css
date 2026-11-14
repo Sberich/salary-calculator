@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
 
 /* ==========================================================================
-   Design Tokens & Themes
+   Design Tokens & Themes (WCAG AA Compliant Contrast)
    ========================================================================== */
 :root,
 [data-theme="warm"] {
@@ -15,32 +15,33 @@
   --bg-surface-subtle: #F6F1EA;
   --bg-surface-elevated: #FFFDF9;
   
-  --text-primary: #1C2430;
-  --text-secondary: #576579;
-  --text-muted: #8E9BAE;
+  --text-primary: #182230;
+  --text-secondary: #4A5568;
+  --text-muted: #718096;
 
   --border-subtle: #ECE4D9;
-  --border-strong: #D9CEBE;
+  --border-strong: #D4C7B5;
 
-  --accent-primary: #C26307;
-  --accent-hover: #9E4D00;
-  --accent-subtle: #FEF3E7;
+  /* WCAG AA contrast >= 4.5:1 on light background */
+  --accent-primary: #B45309;
+  --accent-hover: #92400E;
+  --accent-subtle: #FEF3C7;
   --accent-contrast: #FFFFFF;
 
   --success-primary: #15803D;
-  --success-subtle: #F0FDF4;
+  --success-subtle: #DCFCE7;
 
   --info-primary: #1D4ED8;
-  --info-subtle: #EFF6FF;
+  --info-subtle: #DBEAFE;
 
-  --payslip-header-bg: #2B3442;
-  --payslip-header-text: #FDFEFE;
-  --payslip-total-bg: linear-gradient(135deg, #1F2836 0%, #151D28 100%);
-  --payslip-total-num: #FBBF24;
+  --payslip-header-bg: #1E293B;
+  --payslip-header-text: #F8FAFC;
+  --payslip-total-bg: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  --payslip-total-num: #F59E0B;
 
-  --shadow-sm: 0 1px 3px rgba(28, 36, 48, 0.05);
-  --shadow-md: 0 8px 20px -4px rgba(28, 36, 48, 0.07);
-  --shadow-lg: 0 20px 32px -8px rgba(28, 36, 48, 0.1);
+  --shadow-sm: 0 1px 3px rgba(24, 34, 48, 0.05);
+  --shadow-md: 0 8px 20px -4px rgba(24, 34, 48, 0.08);
+  --shadow-lg: 0 20px 32px -8px rgba(24, 34, 48, 0.12);
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -51,31 +52,32 @@
 [data-theme="nordic"] {
   --bg-page: #F0F4F8;
   --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #E6EDF5;
+  --bg-surface-subtle: #E2E8F0;
   --bg-surface-elevated: #FFFFFF;
   
   --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
 
   --border-subtle: #E2E8F0;
   --border-strong: #CBD5E1;
 
-  --accent-primary: #059669;
-  --accent-hover: #047857;
-  --accent-subtle: #ECFDF5;
+  /* WCAG AA contrast >= 4.5:1 */
+  --accent-primary: #047857;
+  --accent-hover: #065F46;
+  --accent-subtle: #D1FAE5;
   --accent-contrast: #FFFFFF;
 
-  --success-primary: #059669;
-  --success-subtle: #ECFDF5;
+  --success-primary: #047857;
+  --success-subtle: #D1FAE5;
 
-  --info-primary: #2563EB;
-  --info-subtle: #EFF6FF;
+  --info-primary: #1D4ED8;
+  --info-subtle: #DBEAFE;
 
   --payslip-header-bg: #0F172A;
   --payslip-header-text: #F8FAFC;
   --payslip-total-bg: linear-gradient(135deg, #0F172A 0%, #064E3B 100%);
-  --payslip-total-num: #34D399;
+  --payslip-total-num: #10B981;
 
   --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
@@ -96,7 +98,7 @@ body {
   background-color: var(--bg-page);
   color: var(--text-primary);
   line-height: 1.5;
-  min-height: 100vh;
+  min-height: 100dvh;
   transition: background-color 0.25s ease, color 0.25s ease;
   -webkit-font-smoothing: antialiased;
 }
@@ -112,13 +114,23 @@ h1, h2, h3, h4 {
   font-feature-settings: "tnum" 1, "cv01" 1;
 }
 
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+/* Focus Visible Accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
 /* ==========================================================================
    Layout Container
    ========================================================================== */
 .app-container {
-  max-width: 1100px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 24px 16px 64px 16px;
+  padding: 24px 16px env(safe-area-inset-bottom, 32px) 16px;
 }
 
 /* ==========================================================================
@@ -128,9 +140,10 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-subtle);
+  gap: 12px;
 }
 
 .brand-wrapper {
@@ -160,11 +173,38 @@ h1, h2, h3, h4 {
 }
 
 .brand-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: var(--text-secondary);
 }
 
-/* Theme Switcher Button */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.btn-subtle:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
 .theme-switch-btn {
   display: inline-flex;
   align-items: center;
@@ -176,16 +216,16 @@ h1, h2, h3, h4 {
   color: var(--text-primary);
   font-family: var(--font-heading);
   font-size: 0.825rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--shadow-sm);
+  min-height: 40px;
 }
 
 .theme-switch-btn:hover {
   background: var(--bg-surface-subtle);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 /* ==========================================================================
@@ -195,12 +235,18 @@ h1, h2, h3, h4 {
   display: grid;
   grid-template-columns: 1.15fr 0.95fr;
   gap: 28px;
-  align-items: start;
+  align-items: stretch;
+}
+
+.payslip-column {
+  align-self: stretch;
+  position: relative;
 }
 
 @media (max-width: 860px) {
   .main-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
@@ -224,92 +270,73 @@ h1, h2, h3, h4 {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .section-label .step-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--accent-subtle);
   color: var(--accent-primary);
-  font-size: 0.75rem;
+  font-size: 0.775rem;
   font-weight: 700;
 }
 
 /* ==========================================================================
-   Rank Selector Grid
+   Step 1: Modern Styled Dropdown (Select)
    ========================================================================== */
-.rank-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-@media (max-width: 520px) {
-  .rank-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.rank-card {
+.select-container {
   position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.modern-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
   background: var(--bg-surface-subtle);
   border: 1.5px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 12px 10px;
+  padding: 14px 44px 14px 16px;
+  outline: none;
   cursor: pointer;
-  text-align: left;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  user-select: none;
+  transition: all 0.2s ease;
+  min-height: 48px;
 }
 
-.rank-card:hover {
+.modern-select:hover {
   border-color: var(--border-strong);
   background: var(--bg-surface-elevated);
-  transform: translateY(-1px);
 }
 
-.rank-card.active {
-  background: var(--bg-surface-elevated);
+.modern-select:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px var(--accent-subtle), var(--shadow-sm);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
-.rank-card .rank-code {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-}
-
-.rank-card .rank-desc {
-  font-size: 0.725rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rank-card .rank-allowance {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--accent-primary);
-  margin-top: 2px;
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 /* ==========================================================================
-   Salary Input Field
+   Step 2: Salary Input Field & Alert Banner
    ========================================================================== */
 .input-wrapper {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .input-container {
@@ -320,7 +347,6 @@ h1, h2, h3, h4 {
 
 .currency-input {
   width: 100%;
-  font-family: var(--font-mono);
   font-size: 1.35rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -330,6 +356,7 @@ h1, h2, h3, h4 {
   padding: 14px 70px 14px 16px;
   outline: none;
   transition: all 0.2s ease;
+  min-height: 52px;
 }
 
 .currency-input:focus {
@@ -347,26 +374,39 @@ h1, h2, h3, h4 {
   pointer-events: none;
 }
 
-/* Range Badge */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+  color: #B45309;
+  font-size: 0.825rem;
+  font-weight: 500;
+}
+
 .base-status-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
   background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .badge-tag {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.775rem;
   font-weight: 600;
 }
 
@@ -381,26 +421,27 @@ h1, h2, h3, h4 {
 }
 
 /* ==========================================================================
-   Percentage Slider & Quick Pills
+   Step 3: Quick Chips (2.5%, 3.0%, 3.5%) & Slider
    ========================================================================== */
 .chips-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 12px;
 }
 
 .chip-btn {
-  padding: 6px 14px;
+  flex: 1;
+  padding: 10px 16px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface-subtle);
   color: var(--text-secondary);
   font-family: var(--font-heading);
-  font-size: 0.825rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  min-height: 44px;
 }
 
 .chip-btn:hover {
@@ -413,20 +454,19 @@ h1, h2, h3, h4 {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: var(--accent-contrast);
-  font-weight: 600;
 }
 
 .slider-container {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .custom-range {
   flex: 1;
   -webkit-appearance: none;
-  height: 6px;
+  height: 8px;
   border-radius: var(--radius-full);
   background: var(--border-strong);
   outline: none;
@@ -436,8 +476,8 @@ h1, h2, h3, h4 {
 .custom-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--accent-primary);
   border: 2px solid #FFFFFF;
@@ -446,8 +486,14 @@ h1, h2, h3, h4 {
   transition: transform 0.15s ease;
 }
 
-.custom-range::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
+.custom-range::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: 2px solid #FFFFFF;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
 }
 
 .percent-display-box {
@@ -456,17 +502,17 @@ h1, h2, h3, h4 {
   background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  width: 90px;
+  padding: 6px 10px;
+  width: 100px;
+  min-height: 44px;
 }
 
 .percent-input-field {
-  width: 55px;
+  width: 60px;
   background: transparent;
   border: none;
   outline: none;
-  font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
   text-align: right;
@@ -479,7 +525,7 @@ h1, h2, h3, h4 {
 }
 
 /* ==========================================================================
-   Mode Switcher (1 Round vs 2 Rounds Annual)
+   Mode Switcher
    ========================================================================== */
 .mode-toggle-bar {
   display: flex;
@@ -487,12 +533,12 @@ h1, h2, h3, h4 {
   padding: 4px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .mode-tab {
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: none;
   background: transparent;
   font-family: var(--font-heading);
@@ -502,6 +548,7 @@ h1, h2, h3, h4 {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 44px;
 }
 
 .mode-tab.active {
@@ -511,8 +558,21 @@ h1, h2, h3, h4 {
   box-shadow: var(--shadow-sm);
 }
 
+.annual-panel {
+  display: none;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--bg-surface-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.annual-panel.active {
+  display: block;
+}
+
 /* ==========================================================================
-   Digital Payslip (Right Column)
+   Digital Payslip Card (Sticky on Desktop)
    ========================================================================== */
 .payslip-card {
   background: var(--bg-surface);
@@ -522,6 +582,9 @@ h1, h2, h3, h4 {
   box-shadow: var(--shadow-lg);
   position: sticky;
   top: 24px;
+  /* Subtle Guilloche/watermark feel */
+  background-image: radial-gradient(var(--border-subtle) 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
 }
 
 .payslip-header {
@@ -537,7 +600,6 @@ h1, h2, h3, h4 {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.15rem;
-  letter-spacing: -0.01em;
 }
 
 .payslip-badge-sub {
@@ -548,6 +610,7 @@ h1, h2, h3, h4 {
 
 .payslip-seal {
   font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: rgba(255, 255, 255, 0.15);
@@ -567,7 +630,7 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: 0.925rem;
 }
 
 .payslip-row .label {
@@ -583,7 +646,7 @@ h1, h2, h3, h4 {
 }
 
 .highlight-row {
-  background: var(--bg-surface-subtle);
+  background: var(--accent-subtle);
   padding: 12px 14px;
   border-radius: var(--radius-md);
   border-left: 4px solid var(--accent-primary);
@@ -600,13 +663,18 @@ h1, h2, h3, h4 {
   font-weight: 700;
 }
 
+.increment-arrow {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--accent-primary);
+}
+
 .payslip-divider {
   border: none;
   border-top: 1px dashed var(--border-strong);
   margin: 4px 0;
 }
 
-/* Grand Total Banner */
 .payslip-grand-total {
   background: var(--payslip-total-bg);
   color: #FFFFFF;
@@ -620,7 +688,7 @@ h1, h2, h3, h4 {
   font-size: 0.825rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  opacity: 0.85;
+  opacity: 0.9;
   margin-bottom: 4px;
 }
 
@@ -629,13 +697,20 @@ h1, h2, h3, h4 {
   font-weight: 700;
   color: var(--payslip-total-num);
   line-height: 1.1;
-  letter-spacing: -0.02em;
 }
 
 .total-unit {
   font-size: 0.8rem;
   opacity: 0.8;
   margin-top: 4px;
+}
+
+.annual-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* ==========================================================================
@@ -663,13 +738,12 @@ h1, h2, h3, h4 {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-sm);
+  min-height: 48px;
 }
 
 .btn-primary:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
@@ -687,39 +761,109 @@ h1, h2, h3, h4 {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 48px;
 }
 
 .btn-secondary:hover {
   background: var(--bg-surface-elevated);
-  border-color: var(--text-secondary);
 }
 
 /* ==========================================================================
-   Annual Breakdown Panel
+   Modals (Criteria Table & Image Preview Fallback)
    ========================================================================== */
-.annual-panel {
-  display: none;
-  margin-top: 16px;
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 16px;
-  background: var(--bg-surface-subtle);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
+  z-index: 2000;
 }
 
-.annual-panel.active {
-  display: block;
+.modal-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  max-width: 820px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-strong);
 }
 
-.annual-row {
+.modal-header {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  font-size: 0.85rem;
+  align-items: center;
+  padding: 18px 22px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.annual-row:last-child {
-  border-bottom: none;
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.modal-body {
+  padding: 22px;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.criteria-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.criteria-table th, .criteria-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.criteria-table th {
+  background: var(--bg-surface-subtle);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-note {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-surface-subtle);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  line-height: 1.6;
+}
+
+.modal-note ul {
+  padding-left: 20px;
+  margin-top: 6px;
 }
 
 /* ==========================================================================
@@ -732,7 +876,7 @@ h1, h2, h3, h4 {
   transform: translateX(-50%) translateY(100px);
   background: #1E293B;
   color: #FFFFFF;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: var(--radius-full);
   font-size: 0.875rem;
   font-weight: 500;
@@ -740,7 +884,7 @@ h1, h2, h3, h4 {
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .toast-notice.show {
@@ -757,4 +901,46 @@ h1, h2, h3, h4 {
   font-size: 0.8rem;
   color: var(--text-muted);
   line-height: 1.6;
+}
+
+/* ==========================================================================
+   Responsive & Print Rules
+   ========================================================================== */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 16px 12px 80px 12px;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+  }
+  .btn-label, .btn-text-responsive {
+    display: none;
+  }
+  .btn-subtle, .theme-switch-btn {
+    padding: 8px 10px;
+  }
+  .currency-input {
+    font-size: 1.2rem;
+  }
+  .total-number {
+    font-size: 1.85rem;
+  }
+}
+
+@media print {
+  .header-actions, .panel-card, .actions-bar, .toast-notice, .modal-backdrop {
+    display: none !important;
+  }
+  .app-container {
+    max-width: 100%;
+    padding: 0;
+  }
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  .payslip-card {
+    border: 1px solid #000;
+    box-shadow: none;
+    position: static;
+  }
 }

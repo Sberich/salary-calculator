@@ -1,0 +1,18 @@
+{
+  "name": "teacher-salary-calculator",
+  "version": "1.1.0",
+  "description": "ระบบคำนวณเงินเดือนครูและวิทยฐานะตามเกณฑ์ ก.ค.ศ. ฉบับทันสมัย",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/salary-rules.test.js"
+  },
+  "keywords": [
+    "teacher",
+    "salary",
+    "calculator",
+    "otepc",
+    "thailand"
+  ],
+  "author": "TNKPTP",
+  "license": "MIT"
+}

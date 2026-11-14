@@ -1,22 +1,28 @@
 /**
  * salary-rules.js
- * เกณฑ์การคำนวณเงินเดือนครูตามมาตรฐาน ก.ค.ศ.
+ * เกณฑ์การคำนวณเงินเดือนครูตามมาตรฐาน ก.ค.ศ. (ประมาณการตามประกาศ ว 20/2561)
  */
 
 export const SALARY_CRITERIA = {
   k5: {
+    key: 'k5',
     name: 'คศ. 5',
     title: 'ครูเชี่ยวชาญพิเศษ',
+    minSalary: 29980,
+    maxSalary: 76800,
     cutOff: 60840,
     baseHigh: 68560,
     baseLow: 60830,
     allowance: 15600,
     special: 15600,
-    badge: 'ระดับสูงสุด'
+    badge: 'เชี่ยวชาญพิเศษ'
   },
   k4: {
+    key: 'k4',
     name: 'คศ. 4',
     title: 'ครูเชี่ยวชาญ',
+    minSalary: 24400,
+    maxSalary: 69040,
     cutOff: 50330,
     baseHigh: 59630,
     baseLow: 50320,
@@ -25,8 +31,11 @@ export const SALARY_CRITERIA = {
     badge: 'เชี่ยวชาญ'
   },
   k3: {
+    key: 'k3',
     name: 'คศ. 3',
     title: 'ครูชำนาญการพิเศษ',
+    minSalary: 19860,
+    maxSalary: 58390,
     cutOff: 40280,
     baseHigh: 49330,
     baseLow: 37200,
@@ -35,8 +44,11 @@ export const SALARY_CRITERIA = {
     badge: 'ชำนาญการพิเศษ'
   },
   k2: {
+    key: 'k2',
     name: 'คศ. 2',
     title: 'ครูชำนาญการ',
+    minSalary: 16190,
+    maxSalary: 41620,
     cutOff: 30210,
     baseHigh: 35270,
     baseLow: 30200,
@@ -45,8 +57,11 @@ export const SALARY_CRITERIA = {
     badge: 'ชำนาญการ'
   },
   k1: {
+    key: 'k1',
     name: 'คศ. 1',
     title: 'ครู คศ. 1',
+    minSalary: 15440,
+    maxSalary: 34310,
     cutOff: 24890,
     baseHigh: 29600,
     baseLow: 22780,
@@ -55,8 +70,11 @@ export const SALARY_CRITERIA = {
     badge: 'ครูผู้สอน'
   },
   assistant: {
+    key: 'assistant',
     name: 'ครูผู้ช่วย',
-    title: 'ครูผู้ช่วย (แรกบรรจุ)',
+    title: 'ครูผู้ช่วย',
+    minSalary: 15050,
+    maxSalary: 24750,
     cutOff: 19910,
     baseHigh: 22330,
     baseLow: 17480,
@@ -67,7 +85,37 @@ export const SALARY_CRITERIA = {
 };
 
 /**
- * ดึงฐานการคำนวณและระบุว่าเป็นช่วงบนหรือช่วงล่าง
+ * ตรวจสอบความถูกต้องของอัตราเงินเดือนเทียบกับเพดานขั้นต่ำ-ขั้นสูงของอันดับนั้น
+ */
+export function checkSalaryBounds(rankKey, salary) {
+  const criteria = SALARY_CRITERIA[rankKey];
+  if (!criteria) {
+    throw new Error(`ไม่พบข้อมูลวิทยฐานะ: ${rankKey}`);
+  }
+
+  const num = typeof salary === 'number' ? salary : 0;
+  const isBelowMin = num < criteria.minSalary;
+  const isAboveMax = num > criteria.maxSalary;
+
+  let warning = null;
+  if (isBelowMin) {
+    warning = `เงินเดือนต่ำกว่าขั้นต่ำของ ${criteria.name} (${criteria.minSalary.toLocaleString()} บ.)`;
+  } else if (isAboveMax) {
+    warning = `เงินเดือนสูงกว่าเพดานขั้นสูงของ ${criteria.name} (${criteria.maxSalary.toLocaleString()} บ.)`;
+  }
+
+  return {
+    isValid: !isBelowMin && !isAboveMax,
+    isBelowMin,
+    isAboveMax,
+    minSalary: criteria.minSalary,
+    maxSalary: criteria.maxSalary,
+    warning
+  };
+}
+
+/**
+ * ดึงฐานการคำนวณและระบุว่าเป็นช่วงบนหรือช่วงล่างอัตโนมัติ
  */
 export function getCalculationBase(rankKey, currentSalary) {
   const criteria = SALARY_CRITERIA[rankKey];
@@ -84,13 +132,16 @@ export function getCalculationBase(rankKey, currentSalary) {
 }
 
 /**
- * คำนวณเงินเลื่อนขั้นตามเกณฑ์ ก.ค.ศ. ปัดเศษขึ้นเป็นสิบบาท
+ * คำนวณเงินเลื่อนขั้นตามเกณฑ์ ก.ค.ศ. พร้อมปัดเศษขึ้นเป็นสิบบาท
  */
 export function calculateIncrement(baseSalary, percent) {
-  const rawIncrease = Math.round(((baseSalary * percent) / 100) * 100) / 100;
-  // ปัดเศษขึ้นเป็นจำนวนเต็มสิบบาทเสมอตามระเบียบราชการ
+  // Clamp percent between 0% and 6.00%
+  const safePercent = Math.max(0, Math.min(6.0, Number(percent) || 0));
+  const rawIncrease = Math.round(((baseSalary * safePercent) / 100) * 100) / 100;
+  // ปัดเศษขึ้นเป็นจำนวนเต็มสิบบาทตามระเบียบราชการ
   const roundedIncrease = Math.ceil(rawIncrease / 10) * 10;
   return {
+    safePercent,
     rawIncrease,
     roundedIncrease
   };
@@ -105,26 +156,39 @@ export function calculateSalaryResult({ rankKey, currentSalary, percent }) {
     throw new Error(`ไม่พบข้อมูลวิทยฐานะ: ${rankKey}`);
   }
 
+  const bounds = checkSalaryBounds(rankKey, currentSalary);
   const { base: baseSalary, isUpper, cutOff } = getCalculationBase(rankKey, currentSalary);
-  const { rawIncrease, roundedIncrease } = calculateIncrement(baseSalary, percent);
-  const newSalaryBase = currentSalary + roundedIncrease;
+  const { safePercent, rawIncrease, roundedIncrease } = calculateIncrement(baseSalary, percent);
+  
+  const rawNewSalary = currentSalary + roundedIncrease;
+  const isCapped = rawNewSalary > criteria.maxSalary;
+  // เงินเดือนใหม่จริง (หากชนเพดานขั้นสูง ส่วนที่เกินจะได้รับเป็นค่าตอบแทนพิเศษตามระเบียบ)
+  const newSalaryBase = isCapped ? criteria.maxSalary : rawNewSalary;
+  const spilloverCompensation = isCapped ? rawNewSalary - criteria.maxSalary : 0;
+
   const allowance = criteria.allowance;
   const special = criteria.special;
   const totalAllowance = allowance + special;
-  const grandTotal = newSalaryBase + totalAllowance;
+  const grandTotal = newSalaryBase + totalAllowance + spilloverCompensation;
 
   return {
     rankKey,
     rankName: criteria.name,
     rankTitle: criteria.title,
     currentSalary,
-    percent,
+    percent: safePercent,
     baseSalary,
     isUpper,
     cutOff,
+    minSalary: criteria.minSalary,
+    maxSalary: criteria.maxSalary,
+    boundsWarning: bounds.warning,
     rawIncrease,
     roundedIncrease,
+    rawNewSalary,
     newSalaryBase,
+    isCapped,
+    spilloverCompensation,
     allowance,
     special,
     totalAllowance,
@@ -141,14 +205,12 @@ export function simulateAnnualIncrements({
   percentRound1,
   percentRound2
 }) {
-  // รอบที่ 1: เมษายน
   const round1 = calculateSalaryResult({
     rankKey,
     currentSalary: startingSalary,
     percent: percentRound1
   });
 
-  // รอบที่ 2: ตุลาคม (ใช้เงินเดือนใหม่จากรอบที่ 1 เป็นฐานตั้ง)
   const round2 = calculateSalaryResult({
     rankKey,
     currentSalary: round1.newSalaryBase,

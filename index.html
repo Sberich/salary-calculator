@@ -2,9 +2,25 @@
 <html lang="th" data-theme="warm">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบคำนวณเงินเดือนครูและวิทยฐานะ (ก.ค.ศ.) | ครูไทย ยุคใหม่</title>
-  <meta name="description" content="โปรแกรมคำนวณเงินเดือนครูยุคใหม่ คำนวณร้อยละการเลื่อนขั้น เงินวิทยฐานะ และค่าตอบแทนพิเศษตามเกณฑ์ ก.ค.ศ. พร้อมออกสลิปจำลอง">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>คำนวณเงินเดือนครู (ก.ค.ศ.)</title>
+  <meta name="description" content="โปรแกรมประมาณการเงินเดือนครูและวิทยฐานะตามเกณฑ์ ก.ค.ศ.">
+  <meta name="theme-color" content="#FAF7F2" id="metaThemeColor">
+  
+  <!-- ป้องกัน Theme Flash (FOUC) ก่อน Render -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('teacher_salary_theme');
+        if (t === 'nordic' || t === 'warm') {
+          document.documentElement.setAttribute('data-theme', t);
+          var m = document.getElementById('metaThemeColor');
+          if (m) m.setAttribute('content', t === 'nordic' ? '#F0F4F8' : '#FAF7F2');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 </head>
@@ -12,125 +28,110 @@
 
   <div class="app-container">
     
-    <!-- Top Header -->
+    <!-- Header -->
     <header class="header-bar">
       <div class="brand-wrapper">
-        <div class="brand-icon">🎓</div>
+        <div class="brand-icon" aria-hidden="true">🎓</div>
         <div>
           <h1 class="brand-title">คำนวณเงินเดือนครู</h1>
-          <p class="brand-subtitle">ตามเกณฑ์การเลื่อนเงินเดือนและวิทยฐานะ ก.ค.ศ.</p>
+          <p class="brand-subtitle">เกณฑ์ ก.ค.ศ. (ประมาณการ)</p>
         </div>
       </div>
       
-      <!-- Theme Switcher -->
-      <button id="themeToggleBtn" class="theme-switch-btn" title="คลิกเพื่อเปลี่ยนโทนสี">
-        <span id="themeIcon">☀️</span>
-        <span id="themeLabel">ธีม: Warm Editorial</span>
-      </button>
+      <div class="header-actions">
+        <!-- ปุ่มเปิดตารางเกณฑ์ -->
+        <button type="button" id="btnOpenCriteria" class="btn-subtle" title="ดูตารางเกณฑ์ ก.ค.ศ.">
+          <span>📖</span> <span class="btn-label">เกณฑ์ ก.ค.ศ.</span>
+        </button>
+
+        <!-- สลับธีมสี -->
+        <button type="button" id="themeToggleBtn" class="theme-switch-btn" title="เปลี่ยนธีมสี" aria-label="สลับธีม">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel" class="btn-label">Warm</span>
+        </button>
+      </div>
     </header>
 
     <!-- Main Grid -->
     <main class="main-grid">
       
-      <!-- Left Column: Controls & Inputs -->
+      <!-- ฝั่งซ้าย: ข้อมูลนำเข้า -->
       <div class="panel-card">
         
-        <!-- Step 1: Select Rank -->
-        <section aria-labelledby="step1-title">
-          <div class="section-label" id="step1-title">
+        <!-- ข้อ 1: อันดับวิทยฐานะ -->
+        <section class="input-wrapper">
+          <div class="section-label">
             <span class="step-num">1</span>
-            <span>เลือกอันดับ / วิทยฐานะ</span>
+            <label for="rankSelect">อันดับ / วิทยฐานะ</label>
           </div>
           
-          <div class="rank-grid" id="rankGrid" role="radiogroup" aria-label="อันดับวิทยฐานะ">
-            <!-- Will be populated by app.js or rendered static for fast load -->
-            <div class="rank-card" data-rank="assistant" role="radio" aria-checked="false" tabindex="0">
-              <span class="rank-code">ครูผู้ช่วย</span>
-              <span class="rank-desc">แรกบรรจุ</span>
-              <span class="rank-allowance">ไม่มีเงินประจำตำแหน่ง</span>
-            </div>
-            
-            <div class="rank-card" data-rank="k1" role="radio" aria-checked="false" tabindex="0">
-              <span class="rank-code">คศ. 1</span>
-              <span class="rank-desc">ครูผู้สอน</span>
-              <span class="rank-allowance">ไม่มีเงินประจำตำแหน่ง</span>
-            </div>
-
-            <div class="rank-card" data-rank="k2" role="radio" aria-checked="false" tabindex="0">
-              <span class="rank-code">คศ. 2</span>
-              <span class="rank-desc">ชำนาญการ</span>
-              <span class="rank-allowance">+3,500 บ./ด.</span>
-            </div>
-
-            <div class="rank-card active" data-rank="k3" role="radio" aria-checked="true" tabindex="0">
-              <span class="rank-code">คศ. 3</span>
-              <span class="rank-desc">ชำนาญการพิเศษ</span>
-              <span class="rank-allowance">+11,200 บ./ด.</span>
-            </div>
-
-            <div class="rank-card" data-rank="k4" role="radio" aria-checked="false" tabindex="0">
-              <span class="rank-code">คศ. 4</span>
-              <span class="rank-desc">เชี่ยวชาญ</span>
-              <span class="rank-allowance">+19,800 บ./ด.</span>
-            </div>
-
-            <div class="rank-card" data-rank="k5" role="radio" aria-checked="false" tabindex="0">
-              <span class="rank-code">คศ. 5</span>
-              <span class="rank-desc">เชี่ยวชาญพิเศษ</span>
-              <span class="rank-allowance">+31,200 บ./ด.</span>
-            </div>
+          <div class="select-container">
+            <select id="rankSelect" class="modern-select">
+              <option value="assistant">ครูผู้ช่วย (แรกบรรจุ)</option>
+              <option value="k1">คศ. 1 (ครูผู้สอน)</option>
+              <option value="k2">คศ. 2 (ชำนาญการ • +3,500 บ.)</option>
+              <option value="k3" selected>คศ. 3 (ชำนาญการพิเศษ • +11,200 บ.)</option>
+              <option value="k4">คศ. 4 (เชี่ยวชาญ • +19,800 บ.)</option>
+              <option value="k5">คศ. 5 (เชี่ยวชาญพิเศษ • +31,200 บ.)</option>
+            </select>
+            <span class="select-arrow" aria-hidden="true">▼</span>
           </div>
+          <div id="rankBoundInfo" class="text-hint">เพดาน: 19,860 – 58,390 บ.</div>
         </section>
 
-        <!-- Step 2: Current Salary -->
-        <section aria-labelledby="step2-title" class="input-wrapper">
-          <div class="section-label" id="step2-title">
+        <!-- ข้อ 2: เงินเดือนปัจจุบัน -->
+        <section class="input-wrapper">
+          <div class="section-label">
             <span class="step-num">2</span>
-            <span>เงินเดือนปัจจุบัน</span>
+            <label for="salaryInput">เงินเดือนปัจจุบัน</label>
           </div>
           
           <div class="input-container">
             <input 
               type="text" 
               id="salaryInput" 
-              class="currency-input" 
+              class="currency-input mono-num" 
               value="42,000" 
               inputmode="numeric" 
-              placeholder="ระบุเงินเดือนปัจจุบัน"
+              placeholder="ระบุเงินเดือน"
               autocomplete="off"
             >
             <span class="currency-unit">บาท</span>
           </div>
 
-          <!-- Live Range Detection Banner -->
+          <!-- แจ้งเตือนเมื่อเงินเดือนหลุดเพดาน -->
+          <div id="salaryWarningBanner" class="alert-banner" style="display: none;" role="alert">
+            <span class="alert-icon">⚠️</span>
+            <span id="salaryWarningText"></span>
+          </div>
+
+          <!-- แถบแสดงฐานอัตโนมัติ -->
           <div class="base-status-banner">
             <div>
-              <span style="color: var(--text-secondary)">ฐานคำนวณที่ใช้: </span>
-              <strong class="mono-num" id="baseSalaryDisplay" style="color: var(--text-primary)">49,330</strong> บาท
+              <span class="text-secondary">ฐานคำนวณ: </span>
+              <strong class="mono-num text-primary" id="baseSalaryDisplay">49,330</strong> บ.
             </div>
             <div id="bracketBadge" class="badge-tag upper">
-              <span>●</span> <span id="bracketText">ช่วงบน</span>
+              <span id="bracketText">ช่วงบน</span>
             </div>
           </div>
         </section>
 
-        <!-- Step 3: Increment Percentage -->
-        <section aria-labelledby="step3-title">
-          <div class="section-label" id="step3-title">
+        <!-- ข้อ 3: ร้อยละที่ได้เลื่อน -->
+        <section>
+          <div class="section-label">
             <span class="step-num">3</span>
-            <span>ร้อยละที่ได้รับการเลื่อนขั้น</span>
+            <span>ร้อยละที่ได้เลื่อน</span>
           </div>
 
-          <!-- Quick Chips -->
+          <!-- ปุ่มลัด 2.5%, 3.0%, 3.5% -->
           <div class="chips-group" id="chipsGroup">
-            <button type="button" class="chip-btn" data-val="2.0">2.0%</button>
             <button type="button" class="chip-btn" data-val="2.5">2.5%</button>
             <button type="button" class="chip-btn active" data-val="3.0">3.0%</button>
             <button type="button" class="chip-btn" data-val="3.5">3.5%</button>
-            <button type="button" class="chip-btn" data-val="4.0">4.0%</button>
           </div>
 
-          <!-- Slider + Numeric Input -->
+          <!-- แถบสไลด์ + กรอกทศนิยม -->
           <div class="slider-container">
             <input 
               type="range" 
@@ -140,73 +141,76 @@
               max="6.0" 
               step="0.05" 
               value="3.0"
+              aria-label="แถบปรับร้อยละ"
             >
             <div class="percent-display-box">
               <input 
                 type="number" 
                 id="percentInput" 
-                class="percent-input-field" 
+                class="percent-input-field mono-num" 
                 min="0" 
-                max="10" 
+                max="6" 
                 step="0.01" 
                 value="3.00"
+                inputmode="decimal"
+                aria-label="กรอกร้อยละ"
               >
               <span class="percent-symbol">%</span>
             </div>
           </div>
         </section>
 
-        <!-- Calculation Mode: Single vs Annual 2 Rounds -->
+        <!-- สลับโหมด: รอบเดียว vs ทั้งปี -->
         <div class="mode-toggle-bar">
           <button type="button" id="modeSingleBtn" class="mode-tab active">
-            คำนวณรอบเดียว (ปัจจุบัน)
+            รอบเดียว
           </button>
           <button type="button" id="modeAnnualBtn" class="mode-tab">
-            จำลองทั้งปี 2 รอบ (เม.ย. / ต.ค.)
+            ทั้งปี (2 รอบ)
           </button>
         </div>
 
-        <!-- Annual simulation controls (hidden by default) -->
+        <!-- กล่องตั้งค่า 2 รอบ -->
         <div id="annualControls" class="annual-panel">
-          <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px;">กำหนดร้อยละแต่ละรอบ:</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="font-weight: 600; font-size: 0.825rem; margin-bottom: 8px;">ร้อยละแต่ละรอบ:</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
-              <label style="font-size: 0.775rem; color: var(--text-secondary)">รอบที่ 1 (1 เม.ย.):</label>
-              <input type="number" id="annualR1Input" class="percent-input-field mono-num" style="width: 100%; border: 1px solid var(--border-strong); border-radius: 6px; padding: 6px;" value="3.00" step="0.05">
+              <label for="annualR1Input" style="font-size: 0.75rem; color: var(--text-secondary)">รอบ 1 (เม.ย.):</label>
+              <input type="number" id="annualR1Input" class="percent-input-field mono-num" style="width: 100%; border: 1.5px solid var(--border-strong); border-radius: 6px; padding: 6px;" value="3.00" step="0.05" min="0" max="6" inputmode="decimal">
             </div>
             <div>
-              <label style="font-size: 0.775rem; color: var(--text-secondary)">รอบที่ 2 (1 ต.ค.):</label>
-              <input type="number" id="annualR2Input" class="percent-input-field mono-num" style="width: 100%; border: 1px solid var(--border-strong); border-radius: 6px; padding: 6px;" value="3.00" step="0.05">
+              <label for="annualR2Input" style="font-size: 0.75rem; color: var(--text-secondary)">รอบ 2 (ต.ค.):</label>
+              <input type="number" id="annualR2Input" class="percent-input-field mono-num" style="width: 100%; border: 1.5px solid var(--border-strong); border-radius: 6px; padding: 6px;" value="3.00" step="0.05" min="0" max="6" inputmode="decimal">
             </div>
           </div>
         </div>
 
       </div>
 
-      <!-- Right Column: Digital Payslip Card -->
-      <div>
+      <!-- ฝั่งขวา: สลิปจำลอง (Sticky Desktop) -->
+      <div class="payslip-column">
         <div class="payslip-card" id="payslipElement">
           
-          <!-- Payslip Header -->
+          <!-- หัวสลิป -->
           <div class="payslip-header">
             <div>
-              <div class="payslip-badge-title" id="slipRankTitle">ครูชำนาญการพิเศษ (คศ. 3)</div>
-              <div class="payslip-badge-sub">ผลการคำนวณการเลื่อนเงินเดือนจำลอง</div>
+              <div class="payslip-badge-title" id="slipRankTitle">คศ. 3 ชำนาญการพิเศษ</div>
+              <div class="payslip-badge-sub">สลิปประมาณการเงินเดือน</div>
             </div>
             <div class="payslip-seal">ก.ค.ศ.</div>
           </div>
 
-          <!-- Payslip Body -->
+          <!-- เนื้อหาสลิป -->
           <div class="payslip-body">
             
             <div class="payslip-row">
-              <span class="label">ฐานในการคำนวณ:</span>
+              <span class="label">ฐานคำนวณ:</span>
               <span class="value mono-num" id="slipBase">49,330.00 บ.</span>
             </div>
 
             <div class="payslip-row highlight-row">
               <span class="label">
-                <span>▲</span> เงินที่ได้เลื่อนขั้น (<span id="slipPercent">3.00</span>%):
+                <span class="increment-arrow">▲</span> เงินเลื่อนขั้น (<span id="slipPercent">3.00</span>%):
               </span>
               <span class="value mono-num" id="slipIncrement">+1,480.00 บ.</span>
             </div>
@@ -214,8 +218,14 @@
             <hr class="payslip-divider">
 
             <div class="payslip-row">
-              <span class="label">เงินเดือนใหม่ (เลื่อนขั้นแล้ว):</span>
+              <span class="label">เงินเดือนใหม่:</span>
               <span class="value mono-num" id="slipNewBase">43,480.00 บ.</span>
+            </div>
+
+            <!-- แถบแจ้งเตือนชนเพดาน -->
+            <div id="slipCappedRow" class="payslip-row" style="display: none; color: var(--accent-primary); font-size: 0.8rem;">
+              <span>* ชนเพดาน (ส่วนเกินเป็นค่าตอบแทนพิเศษ):</span>
+              <span class="mono-num" id="slipSpillover">+0.00 บ.</span>
             </div>
 
             <div class="payslip-row">
@@ -224,47 +234,47 @@
             </div>
 
             <div class="payslip-row">
-              <span class="label">ค่าตอบแทนพิเศษรายเดือน:</span>
+              <span class="label">ค่าตอบแทนพิเศษ:</span>
               <span class="value mono-num" id="slipSpecial">5,600.00 บ.</span>
             </div>
 
-            <div class="payslip-row" style="color: var(--text-secondary); font-size: 0.8rem;">
-              <span>รวมเงินประจำตำแหน่ง:</span>
+            <div class="payslip-row" style="color: var(--text-secondary); font-size: 0.825rem;">
+              <span>รวมเงินวิทยฐานะ:</span>
               <span class="mono-num" id="slipTotalAllowance">11,200.00 บ.</span>
             </div>
 
-            <!-- Grand Total Box -->
+            <!-- ยอดรวมก่อนหัก -->
             <div class="payslip-grand-total">
-              <div class="total-title">รวมรายรับสุทธิโดยประมาณ</div>
+              <div class="total-title">รวมรับก่อนหัก (ประมาณการ)</div>
               <div class="total-number mono-num" id="slipGrandTotal">54,680.00</div>
               <div class="total-unit">บาท / เดือน</div>
             </div>
 
-            <!-- Annual projection rows (toggled by annual mode) -->
-            <div id="annualSummarySection" style="display: none; padding-top: 6px;">
+            <!-- สรุปผลทั้งปี 2 รอบ -->
+            <div id="annualSummarySection" style="display: none; padding-top: 4px;">
               <div class="annual-row">
-                <span style="color: var(--text-secondary)">เงินเดือนหลังรอบ เม.ย.:</span>
-                <strong class="mono-num" id="slipAnnualR1">43,480.00 บ.</strong>
+                <span class="text-secondary">เงินเดือนใหม่รอบ เม.ย.:</span>
+                <strong class="mono-num text-primary" id="slipAnnualR1">43,480.00 บ.</strong>
               </div>
               <div class="annual-row">
-                <span style="color: var(--text-secondary)">เงินเดือนหลังรอบ ต.ค.:</span>
-                <strong class="mono-num" id="slipAnnualR2">44,960.00 บ.</strong>
+                <span class="text-secondary">เงินเดือนใหม่รอบ ต.ค.:</span>
+                <strong class="mono-num text-primary" id="slipAnnualR2">44,960.00 บ.</strong>
               </div>
               <div class="annual-row" style="color: var(--accent-primary); font-weight: 600;">
-                <span>รวมเงินเดือนเพิ่มขึ้นตลอดทั้งปี:</span>
+                <span>รวมขึ้นทั้งปี:</span>
                 <span class="mono-num" id="slipAnnualTotalInc">+2,960.00 บ.</span>
               </div>
             </div>
 
           </div>
 
-          <!-- Actions Toolbar -->
+          <!-- แถบปุ่มแอคชั่น -->
           <div class="actions-bar">
-            <button type="button" id="btnExportImage" class="btn-primary" title="ดาวน์โหลดภาพสลิป">
-              <span>📷</span> บันทึกรูปภาพสลิป
+            <button type="button" id="btnExportImage" class="btn-primary" title="บันทึกรูปภาพสลิป">
+              <span>📷</span> <span>เซฟรูปสลิป</span>
             </button>
-            <button type="button" id="btnCopySummary" class="btn-secondary" title="คัดลอกสรุปผลลัพธ์">
-              <span>📋</span> คัดลอกข้อความ
+            <button type="button" id="btnCopySummary" class="btn-secondary" title="คัดลอกข้อความสรุป">
+              <span>📋</span> <span>คัดลอกสรุป</span>
             </button>
           </div>
 
@@ -273,22 +283,135 @@
 
     </main>
 
-    <!-- Off-screen Canvas for High-Res Image Generation -->
+    <!-- Canvas ซ่อนสำหรับสร้างรูปภาพ Retina 2x -->
     <canvas id="exportCanvas" style="display: none;"></canvas>
 
-    <!-- Toast Notification -->
-    <div id="toastNotice" class="toast-notice" role="alert" aria-live="polite">
-      คัดลอกข้อความสรุปเรียบร้อยแล้ว
+    <!-- Modal: ตารางเกณฑ์ ก.ค.ศ. (#criteriaModal) -->
+    <div id="criteriaModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="criteriaTitle" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="criteriaTitle" class="modal-title">📖 ตารางเกณฑ์ ก.ค.ศ. (ว 20/2561)</h2>
+          <button type="button" id="btnCloseCriteria" class="modal-close-btn" aria-label="ปิด">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="criteria-table">
+              <thead>
+                <tr>
+                  <th>อันดับ</th>
+                  <th>เพดาน (ขั้นต่ำ–สูง)</th>
+                  <th>จุดตัด</th>
+                  <th>ฐานล่าง</th>
+                  <th>ฐานบน</th>
+                  <th>วิทยฐานะ</th>
+                  <th>ตอบแทนพิเศษ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>คศ. 5</strong></td>
+                  <td>29,980 – 76,800</td>
+                  <td>60,840</td>
+                  <td>60,830</td>
+                  <td>68,560</td>
+                  <td>15,600</td>
+                  <td>15,600</td>
+                </tr>
+                <tr>
+                  <td><strong>คศ. 4</strong></td>
+                  <td>24,400 – 69,040</td>
+                  <td>50,330</td>
+                  <td>50,320</td>
+                  <td>59,630</td>
+                  <td>9,900</td>
+                  <td>9,900</td>
+                </tr>
+                <tr>
+                  <td><strong>คศ. 3</strong></td>
+                  <td>19,860 – 58,390</td>
+                  <td>40,280</td>
+                  <td>37,200</td>
+                  <td>49,330</td>
+                  <td>5,600</td>
+                  <td>5,600</td>
+                </tr>
+                <tr>
+                  <td><strong>คศ. 2</strong></td>
+                  <td>16,190 – 41,620</td>
+                  <td>30,210</td>
+                  <td>30,200</td>
+                  <td>35,270</td>
+                  <td>3,500</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td><strong>คศ. 1</strong></td>
+                  <td>15,440 – 34,310</td>
+                  <td>24,890</td>
+                  <td>22,780</td>
+                  <td>29,600</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td><strong>ครูผู้ช่วย</strong></td>
+                  <td>15,050 – 24,750</td>
+                  <td>19,910</td>
+                  <td>17,480</td>
+                  <td>22,330</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-note">
+            • คศ.3, 4, 5 ได้รับเงินตอบแทนพิเศษเท่าเงินวิทยฐานะ (ตามระเบียบ พ.ศ. 2550)<br>
+            • สูตรคำนวณ: <code>(ฐาน × ร้อยละ) ÷ 100</code> ปัดเศษขึ้นเป็นสิบบาทเสมอ
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Image Preview สำหรับแตะค้างบันทึกรูป (#imageModal) -->
+    <div id="imageModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle" style="display: none;">
+      <div class="modal-card" style="max-width: 480px; text-align: center;">
+        <div class="modal-header">
+          <h2 id="imageModalTitle" class="modal-title">บันทึกรูปสลิป</h2>
+          <button type="button" id="btnCloseImageModal" class="modal-close-btn" aria-label="ปิด">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc" style="color: var(--accent-primary); font-weight: 500;">
+            แตะที่รูปค้างไว้ (Long-press) เพื่อบันทึกรูป หรือกดปุ่มด้านล่าง
+          </p>
+          <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-md);">
+            <img id="modalPreviewImg" src="" alt="สลิปเงินเดือน" style="width: 100%; height: auto; display: block;">
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button type="button" id="btnModalDownloadDirect" class="btn-secondary" style="flex: 1;">
+              <span>💾</span> ดาวน์โหลด
+            </button>
+            <button type="button" id="btnModalShare" class="btn-primary" style="flex: 1;">
+              <span>📤</span> แชร์เข้า LINE
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast แจ้งเตือน -->
+    <div id="toastNotice" class="toast-notice" role="status" aria-live="polite">
+      คัดลอกสรุปเรียบร้อยแล้ว
     </div>
 
     <!-- Footer -->
     <footer class="app-footer">
-      <p>จัดทำเพื่ออำนวยความสะดวกแก่ข้าราชการครูและบุคลากรทางการศึกษา</p>
-      <p>* การคำนวณอ้างอิงตามระเบียบและหลักเกณฑ์การเลื่อนเงินเดือนของ ก.ค.ศ. (ปัดเศษขึ้นเต็มสิบบาท)</p>
+      <p>อ้างอิงเกณฑ์ ก.ค.ศ. (ว 20/2561) • ปัดเศษขึ้นเต็มสิบบาท</p>
     </footer>
 
   </div>
 
-  <script type="module" src="js/app.js"></script>
+  <!-- สคริปต์แบบ Standalone ทำงานได้ทันทีทั้งบน file:// และ Web Server -->
+  <script src="js/app.js"></script>
 </body>
 </html>
