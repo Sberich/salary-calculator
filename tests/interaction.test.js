@@ -35,12 +35,19 @@ test('verify HTML structure and element presence', () => {
     'id="heroTotalAllowance"',
     'id="slipTotalAllowance"',
     'id="bracketIcon"',
-    'id="bracketText"'
+    'id="bracketText"',
+    'id="btnToggleLedger"',
+    'id="ledgerCardBody"',
+    'id="sectionLedgerTitle"'
   ];
 
   for (const elem of requiredElements) {
     assert.ok(html.includes(elem), `index.html must include ${elem}`);
   }
+
+  // Check section name updated to บัญชีแจกแจงเงินเดือน
+  assert.ok(html.includes('บัญชีแจกแจงเงินเดือน'), 'must include บัญชีแจกแจงเงินเดือน');
+  assert.ok(!html.includes('โครงสร้างรายรับ'), 'โครงสร้างรายรับ should be replaced');
 
   // Check PWA tags
   assert.ok(html.includes('rel="manifest"'), 'must include manifest link');

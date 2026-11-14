@@ -18,6 +18,11 @@
           if (m) m.setAttribute('content', t === 'nordic' ? '#0B1713' : '#F3F7F5');
         }
       } catch (e) {}
+      try {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true || localStorage.getItem('pwa_app_installed') === 'true') {
+          document.documentElement.classList.add('pwa-standalone');
+        }
+      } catch (e) {}
     })();
   </script>
 
@@ -308,17 +313,24 @@
         </div>
       </section>
 
-      <!-- โซนที่ 2: บัญชีแจกแจงโครงสร้างรายรับ (Natural Alpine Ledger) -->
-      <section class="nature-card" aria-labelledby="sectionLedgerTitle">
-        <div class="card-head">
+      <!-- โซนที่ 2: บัญชีแจกแจงเงินเดือน (Natural Alpine Ledger - เปิด/ปิดพับซ่อนได้ เริ่มต้นซ่อนไว้) -->
+      <section class="nature-card" id="ledgerCard" aria-labelledby="sectionLedgerTitle">
+        <div class="card-head card-head-interactive" id="ledgerCardHead" role="button" tabindex="0" aria-expanded="false" aria-controls="ledgerCardBody" title="แตะเพื่อเปิด/ปิด บัญชีแจกแจงเงินเดือน">
           <div class="card-head-title">
             <span class="card-head-icon" aria-hidden="true">🌿</span>
-            <h2 id="sectionLedgerTitle" class="card-heading">โครงสร้างรายรับ</h2>
+            <h2 id="sectionLedgerTitle" class="card-heading">บัญชีแจกแจงเงินเดือน</h2>
+            <span class="card-head-badge">ว 20/2561</span>
           </div>
-          <span class="card-head-badge">ว 20/2561</span>
+          
+          <div class="card-head-actions">
+            <button type="button" id="btnToggleLedger" class="card-toggle-pill" aria-label="สลับการแสดงบัญชีแจกแจงเงินเดือน">
+              <span id="ledgerToggleText" class="toggle-text">แสดง</span>
+              <span id="ledgerToggleIcon" class="toggle-icon" aria-hidden="true">▼</span>
+            </button>
+          </div>
         </div>
 
-        <div class="card-body">
+        <div class="card-body collapsible-body collapsed" id="ledgerCardBody" style="display: none;">
           <div class="nature-ledger">
             
             <div class="ledger-row">

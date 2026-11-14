@@ -441,6 +441,34 @@ function toggleParams(force) {
   }
 }
 
+function toggleLedger(force) {
+  const body = document.getElementById('ledgerCardBody');
+  const toggleBtn = document.getElementById('btnToggleLedger');
+  const toggleHead = document.getElementById('ledgerCardHead');
+  const toggleText = document.getElementById('ledgerToggleText');
+  const toggleIcon = document.getElementById('ledgerToggleIcon');
+  if (!body) return;
+
+  const isCurrentlyOpen = body.style.display !== 'none' && !body.classList.contains('collapsed');
+  const willOpen = typeof force === 'boolean' ? force : !isCurrentlyOpen;
+
+  if (willOpen) {
+    body.classList.remove('collapsed');
+    body.style.display = 'block';
+    if (toggleHead) toggleHead.setAttribute('aria-expanded', 'true');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+    if (toggleText) toggleText.textContent = 'ซ่อน';
+    if (toggleIcon) toggleIcon.textContent = '▲';
+  } else {
+    body.classList.add('collapsed');
+    body.style.display = 'none';
+    if (toggleHead) toggleHead.setAttribute('aria-expanded', 'false');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+    if (toggleText) toggleText.textContent = 'แสดง';
+    if (toggleIcon) toggleIcon.textContent = '▼';
+  }
+}
+
 // ==========================================================================
 // 6. Reactive Calculation
 // ==========================================================================
@@ -590,6 +618,28 @@ function setupEventListeners() {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         toggleParams();
+      }
+    };
+  }
+
+  // เปิด/ปิด บัญชีแจกแจงเงินเดือน (Collapsible)
+  const btnToggleLedger = document.getElementById('btnToggleLedger');
+  const ledgerCardHead = document.getElementById('ledgerCardHead');
+
+  if (btnToggleLedger) {
+    btnToggleLedger.onclick = (e) => {
+      e.stopPropagation();
+      toggleLedger();
+    };
+  }
+  if (ledgerCardHead) {
+    ledgerCardHead.onclick = () => {
+      toggleLedger();
+    };
+    ledgerCardHead.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleLedger();
       }
     };
   }
@@ -919,11 +969,11 @@ function fallbackCopyText(text) {
 }
 
 // ==========================================================================
-// 9. High-Res Canvas Generator & Export
+// 9. High-Res Luxury Canvas Generator & Export (ฉบับหรูหรา อลังการ พรีเมียม)
 // ==========================================================================
 async function handleExportImage() {
   if (!state.lastResult) return;
-  showToast('กำลังสร้างรูปสลิป...');
+  showToast('กำลังสร้างรูปสลิปพรีเมียม...');
 
   try {
     if (document.fonts) {
@@ -937,141 +987,256 @@ async function handleExportImage() {
   const ctx = canvas.getContext('2d');
 
   const scale = 2;
-  const logicalWidth = 800;
-  const logicalHeight = state.annualMode ? 980 : 840;
+  const logicalWidth = 920;
+  const logicalHeight = state.annualMode ? 1340 : 1160;
 
   canvas.width = logicalWidth * scale;
   canvas.height = logicalHeight * scale;
   ctx.scale(scale, scale);
 
-  const isWarm = state.theme === 'warm';
-  const bgColor = isWarm ? '#F2F6F4' : '#0A1612';
-  const cardColor = isWarm ? '#FFFFFF' : '#12231D';
-  const headerBg = isWarm ? '#064E3B' : '#0D261E';
-  const primaryText = isWarm ? '#122B22' : '#F0F7F4';
-  const secondaryText = isWarm ? '#3B584C' : '#A3C5B7';
-  const accentColor = isWarm ? '#059669' : '#10B981';
-  const totalNumColor = isWarm ? '#6EE7B7' : '#34D399';
-
-  // 1. พื้นหลัง
-  ctx.fillStyle = bgColor;
+  // 1. พื้นหลังอลังการ Deep Alpine Obsidian Gradient
+  const bgGrad = ctx.createLinearGradient(0, 0, logicalWidth, logicalHeight);
+  bgGrad.addColorStop(0, '#04100B');
+  bgGrad.addColorStop(0.5, '#0A231A');
+  bgGrad.addColorStop(1, '#05140E');
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
-  // 2. การ์ดสีขาว/เข้ม
-  const pad = 32;
+  // ละอองแสงมรกตและประกายทอง Ambient Orbs
+  const g1 = ctx.createRadialGradient(logicalWidth - 80, 80, 20, logicalWidth - 80, 80, 420);
+  g1.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
+  g1.addColorStop(1, 'rgba(16, 185, 129, 0)');
+  ctx.fillStyle = g1;
+  ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+  const g2 = ctx.createRadialGradient(80, logicalHeight - 100, 20, 80, logicalHeight - 100, 400);
+  g2.addColorStop(0, 'rgba(245, 158, 11, 0.12)');
+  g2.addColorStop(1, 'rgba(245, 158, 11, 0)');
+  ctx.fillStyle = g2;
+  ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+  // 2. ขอบการ์ดใหญ่สไตล์พรีเมียม ขอบทองคำแชมเปญ
+  const pad = 36;
   const cardW = logicalWidth - (pad * 2);
   const cardH = logicalHeight - (pad * 2);
-  const r = 20;
+  const r = 26;
 
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-  ctx.shadowBlur = 20;
-  ctx.shadowOffsetY = 6;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 12;
   roundRect(ctx, pad, pad, cardW, cardH, r);
-  ctx.fillStyle = cardColor;
+  ctx.fillStyle = 'rgba(11, 27, 21, 0.96)';
   ctx.fill();
   ctx.restore();
 
-  // 3. หัวการ์ดธรรมชาติ
+  // เส้นขอบทองคำคู่สุดหรู
   ctx.save();
-  roundRect(ctx, pad, pad, cardW, 110, { tl: r, tr: r, br: 0, bl: 0 });
-  ctx.fillStyle = headerBg;
+  roundRect(ctx, pad, pad, cardW, cardH, r);
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.65)'; // Metallic Gold
+  ctx.stroke();
+
+  roundRect(ctx, pad + 6, pad + 6, cardW - 12, cardH - 12, r - 4);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(16, 185, 129, 0.28)'; // Emerald Hairline
+  ctx.stroke();
+  ctx.restore();
+
+  // 3. หัวกระดาษสง่างาม (Grand Header)
+  const headerH = 130;
+  ctx.save();
+  const headGrad = ctx.createLinearGradient(pad, pad, pad + cardW, pad + headerH);
+  headGrad.addColorStop(0, '#0F382B');
+  headGrad.addColorStop(1, '#071F17');
+  roundRect(ctx, pad, pad, cardW, headerH, { tl: r, tr: r, br: 0, bl: 0 });
+  ctx.fillStyle = headGrad;
   ctx.fill();
 
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 25px "Prompt", sans-serif';
-  ctx.fillText(`ธาราคำนวณ • ${res.rankName} ${res.rankTitle}`, pad + 28, pad + 48);
+  // เส้นคั่นทองใต้หัวกระดาษ
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + headerH);
+  ctx.lineTo(pad + cardW, pad + headerH);
+  ctx.stroke();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  ctx.font = '15px "Sarabun", sans-serif';
-  ctx.fillText(`สรุปประมาณการเงินเดือนครู • เกณฑ์ ก.ค.ศ. (ว 20/2561)`, pad + 28, pad + 80);
-
-  // ตรา ก.ค.ศ.
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
-  roundRect(ctx, pad + cardW - 110, pad + 35, 84, 32, 16);
+  // ตราสัญลักษณ์ภูเขาและสายน้ำ (Alpine Emblem)
+  const embX = pad + 32;
+  const embY = pad + 38;
+  ctx.fillStyle = 'rgba(245, 158, 11, 0.9)'; // Golden peak
+  ctx.beginPath();
+  ctx.moveTo(embX + 22, embY + 8);
+  ctx.lineTo(embX + 38, embY + 38);
+  ctx.lineTo(embX + 6, embY + 38);
+  ctx.closePath();
   ctx.fill();
+
+  ctx.fillStyle = '#10B981'; // Emerald peak
+  ctx.beginPath();
+  ctx.moveTo(embX + 34, embY + 16);
+  ctx.lineTo(embX + 46, embY + 38);
+  ctx.lineTo(embX + 22, embY + 38);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = '#38BDF8'; // River wave
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(embX + 6, embY + 44);
+  ctx.bezierCurveTo(embX + 18, embY + 40, embX + 28, embY + 48, embX + 46, embY + 44);
+  ctx.stroke();
+
+  // ข้อความหัวกระดาษ
   ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 34px "Prompt", -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('ธาราคำนวณ', pad + 96, pad + 54);
+
+  ctx.fillStyle = '#A7F3D0';
+  ctx.font = '18px "Sarabun", -apple-system, sans-serif';
+  ctx.fillText('สรุปประมาณการเงินเดือนข้าราชการครูและบุคลากรทางการศึกษา', pad + 96, pad + 90);
+
+  // ป้ายเกณฑ์มาตรฐาน ก.ค.ศ.
+  roundRect(ctx, pad + cardW - 200, pad + 44, 168, 42, 21);
+  ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(245, 158, 11, 0.65)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = '#FDE68A';
   ctx.font = 'bold 15px "Prompt", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('ก.ค.ศ.', pad + cardW - 68, pad + 56);
+  ctx.fillText('ก.ค.ศ. ว 20 • ว 8', pad + cardW - 116, pad + 71);
   ctx.restore();
 
-  // 4. รายการข้อมูล
-  let y = pad + 150;
-  const colL = pad + 28;
-  const colR = pad + cardW - 28;
+  // 4. The Crown Jewel: Hero Showcase Card (กล่องสรุปรายรับยักษ์สุดหรู)
+  let y = pad + headerH + 28;
+  const heroX = pad + 28;
+  const heroW = cardW - 56;
+  const heroH = 270;
 
-  function drawRow(label, value, isHighlight = false) {
-    if (isHighlight) {
-      ctx.fillStyle = isWarm ? '#D1FAE5' : 'rgba(16, 185, 129, 0.18)';
-      roundRect(ctx, colL - 6, y - 24, cardW - 44, 40, 8);
-      ctx.fill();
-
-      ctx.fillStyle = accentColor;
-      ctx.font = 'bold 18px "Prompt", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(label, colL, y + 3);
-
-      ctx.font = 'bold 20px "SF Mono", monospace';
-      ctx.textAlign = 'right';
-      ctx.fillText(value, colR, y + 3);
-    } else {
-      ctx.fillStyle = secondaryText;
-      ctx.font = '18px "Sarabun", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(label, colL, y);
-
-      ctx.fillStyle = primaryText;
-      ctx.font = '600 18px "SF Mono", monospace';
-      ctx.textAlign = 'right';
-      ctx.fillText(value, colR, y);
-    }
-    y += 44;
-  }
-
-  drawRow('ฐานคำนวณ:', `${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ฐานบน' : 'ฐานล่าง'})`);
-  drawRow(`▲ เงินเลื่อนขั้น (${res.percent.toFixed(2)}%):`, `+${formatCurrency(res.roundedIncrease)} บ.`, true);
-
-  // เส้นแบ่งสายน้ำ
-  y += 4;
-  ctx.strokeStyle = isWarm ? '#E1EBE5' : '#1F3D32';
-  ctx.beginPath();
-  ctx.moveTo(colL, y);
-  ctx.lineTo(colR, y);
-  ctx.stroke();
-  y += 30;
-
-  drawRow('เงินเดือนเนื้อแท้ใหม่:', `${formatCurrency(res.newSalaryBase)} บ.`);
-  drawRow('เงินวิทยฐานะ:', `${formatCurrency(res.allowance)} บ.`);
-  drawRow('ค่าตอบแทนพิเศษ:', `${formatCurrency(res.special)} บ.`);
-  drawRow('รวมเงินประจำตำแหน่ง:', `${formatCurrency(res.totalAllowance)} บ.`);
-
-  y += 12;
-
-  // 5. กล่องยอดรวม
-  const bannerH = 110;
   ctx.save();
-  roundRect(ctx, colL, y, cardW - 56, bannerH, 14);
-  ctx.fillStyle = isWarm ? '#064E3B' : '#0D261E';
+  const heroGrad = ctx.createLinearGradient(heroX, y, heroX, y + heroH);
+  heroGrad.addColorStop(0, '#133D2F');
+  heroGrad.addColorStop(1, '#0B261D');
+  roundRect(ctx, heroX, y, heroW, heroH, 22);
+  ctx.fillStyle = heroGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(52, 211, 153, 0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // แถบวิทยฐานะ & ฐานบน/ล่าง (ภายใน Hero)
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 22px "Prompt", sans-serif';
+  const rankText = `${res.rankName} ${res.rankTitle}`;
+  const rankW = ctx.measureText(rankText).width;
+
+  roundRect(ctx, heroX + 24, y + 22, rankW + 28, 38, 19);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(rankText, heroX + 38, y + 49);
+
+  // ข้อความ ฐานบน / ฐานล่าง แบบเรียบหรูไร้กรอบ
+  const tierIcon = res.isUpper ? '⛰️' : '🌊';
+  const tierText = res.isUpper ? 'ฐานบน' : 'ฐานล่าง';
+  ctx.fillStyle = res.isUpper ? '#6EE7B7' : '#93C5FD';
+  ctx.font = 'bold 20px "Prompt", sans-serif';
+  ctx.fillText(`${tierIcon} ${tierText}`, heroX + rankW + 68, y + 49);
+
+  // ป้ายคำอธิบาย
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '18px "Sarabun", sans-serif';
+  ctx.fillText('ประมาณการรายรับรวมต่อเดือน (ก่อนหักภาษีและ กบข.)', heroX + 26, y + 96);
+
+  // ตัวเลขยอดรวมรายเดือนขนาดมหึมา (HUGE 58px BOLD)
+  ctx.font = '600 36px "Prompt", sans-serif';
+  ctx.fillStyle = '#6EE7B7';
+  ctx.fillText('฿', heroX + 26, y + 154);
+
+  ctx.font = 'bold 56px "Prompt", "SF Mono", monospace';
+  ctx.fillStyle = '#34D399';
+  ctx.fillText(formatCurrency(res.grandTotal), heroX + 64, y + 156);
+
+  const numW = ctx.measureText(formatCurrency(res.grandTotal)).width;
+  ctx.font = '19px "Sarabun", sans-serif';
+  ctx.fillStyle = '#CBD5E1';
+  ctx.fillText('บาท / เดือน', heroX + 76 + numW, y + 152);
+
+  // แถบไฮไลต์เงินเลื่อนขั้น (Emerald Highlight Ribbon)
+  const ribbonY = y + 196;
+  const ribbonH = 48;
+  roundRect(ctx, heroX + 24, ribbonY, heroW - 48, ribbonH, 12);
+  const ribGrad = ctx.createLinearGradient(heroX + 24, ribbonY, heroX + heroW - 24, ribbonY);
+  ribGrad.addColorStop(0, '#059669');
+  ribGrad.addColorStop(1, '#047857');
+  ctx.fillStyle = ribGrad;
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-  ctx.font = '15px "Prompt", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('รวมรับรายเดือนโดยประมาณ', logicalWidth / 2, y + 32);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 21px "Prompt", sans-serif';
+  ctx.fillText(`▲ เงินเลื่อนขั้นรอบนี้ (+${state.percent.toFixed(2)}%):`, heroX + 44, ribbonY + 32);
 
-  ctx.fillStyle = totalNumColor;
-  ctx.font = 'bold 36px "Prompt", monospace';
-  ctx.fillText(`${formatCurrency(res.grandTotal)}`, logicalWidth / 2, y + 72);
-  ctx.font = '13px "Sarabun", sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-  ctx.fillText('บาท / เดือน', logicalWidth / 2, y + 94);
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 24px "SF Mono", monospace';
+  ctx.fillText(`+${formatCurrency(res.roundedIncrease)} บาท`, heroX + heroW - 44, ribbonY + 33);
   ctx.restore();
 
-  y += bannerH + 24;
+  // 5. บัญชีแจกแจงเงินเดือน (Detailed Breakdown Cards)
+  y += heroH + 28;
+  const colL = pad + 32;
+  const colR = pad + cardW - 32;
 
-  // 6. ส่วนข้อมูล 2 รอบถ้าเปิดโหมดไว้
+  ctx.fillStyle = '#F8FAFC';
+  ctx.font = 'bold 24px "Prompt", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('🌿 บัญชีแจกแจงเงินเดือน', colL, y);
+  y += 20;
+
+  function drawLuxuryRow(label, value, isBold = false, isAccent = false) {
+    y += 10;
+    // พื้นหลังแถวสลับแสง
+    if (isAccent) {
+      roundRect(ctx, colL - 8, y - 24, cardW - 48, 48, 10);
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.16)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    ctx.textAlign = 'left';
+    ctx.font = isBold ? 'bold 21px "Prompt", sans-serif' : '20px "Sarabun", sans-serif';
+    ctx.fillStyle = isAccent ? '#6EE7B7' : (isBold ? '#FFFFFF' : '#CBD5E1');
+    ctx.fillText(label, colL + (isAccent ? 12 : 0), y + 7);
+
+    ctx.textAlign = 'right';
+    ctx.font = isBold ? 'bold 24px "SF Mono", monospace' : '600 22px "SF Mono", monospace';
+    ctx.fillStyle = isAccent ? '#FDE68A' : (isBold ? '#FFFFFF' : '#F1F5F9');
+    ctx.fillText(value, colR - (isAccent ? 12 : 0), y + 7);
+    y += 42;
+  }
+
+  drawLuxuryRow('ฐานคำนวณที่ใช้ในการประเมิน:', `${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ฐานบน' : 'ฐานล่าง'})`);
+  drawLuxuryRow('เงินเดือนใหม่ (หลังเลื่อนขั้น):', `${formatCurrency(res.newSalaryBase)} บาท`, true);
+  drawLuxuryRow('เงินวิทยฐานะ (เงินประจำตำแหน่ง):', `${formatCurrency(res.allowance)} บาท`);
+  drawLuxuryRow('ค่าตอบแทนพิเศษ (คศ.3–คศ.5):', `${formatCurrency(res.special)} บาท`);
+  drawLuxuryRow('รวมเงินวิทยฐานะและค่าตอบแทน:', `${formatCurrency(res.totalAllowance)} บาท`, true, true);
+
+  if (res.isCapped) {
+    drawLuxuryRow('⚠️ ส่วนเกินชนเพดานเงินเดือน (จ่ายชดเชย):', `+${formatCurrency(res.spilloverCompensation)} บาท`, true);
+  }
+
+  // 6. กรณีโหมด 2 รอบทั้งปี (Annual 2-Round Projection)
   if (state.annualMode) {
+    y += 10;
     const annual = simulateAnnualIncrements({
       rankKey: state.rankKey,
       startingSalary: state.salary,
@@ -1079,45 +1244,64 @@ async function handleExportImage() {
       percentRound2: state.annualR2
     });
 
-    ctx.fillStyle = isWarm ? '#F6F1EA' : '#E2E8F0';
-    roundRect(ctx, colL, y, cardW - 56, 100, 10);
+    const annW = cardW - 56;
+    const annH = 126;
+    roundRect(ctx, colL - 8, y, annW + 16, annH, 14);
+    ctx.fillStyle = 'rgba(15, 38, 30, 0.85)';
     ctx.fill();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
-    ctx.fillStyle = primaryText;
-    ctx.font = 'bold 15px "Prompt", sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('📈 ผลจำลองทั้งปี 2 รอบ:', colL + 14, y + 24);
+    ctx.fillStyle = '#38BDF8';
+    ctx.font = 'bold 20px "Prompt", sans-serif';
+    ctx.fillText('🌊 ผลการเลื่อนขั้นทั้งปีงบประมาณ (2 รอบต่อเนื่อง):', colL + 12, y + 32);
 
-    ctx.fillStyle = secondaryText;
-    ctx.font = '15px "Sarabun", sans-serif';
-    ctx.fillText(`• เม.ย. (${state.annualR1}%): ${formatCurrency(annual.round1.newSalaryBase)} บ.`, colL + 14, y + 50);
-    ctx.fillText(`• ต.ค. (${state.annualR2}%): ${formatCurrency(annual.round2.newSalaryBase)} บ.`, colL + 14, y + 76);
+    ctx.fillStyle = '#CBD5E1';
+    ctx.font = '18px "Sarabun", sans-serif';
+    ctx.fillText(`• เม.ย. (${state.annualR1.toFixed(1)}%): +${annual.round1.roundedIncrease.toLocaleString()} บ.  ➔  เงินเดือน ${formatCurrency(annual.round1.newSalaryBase)} บ.`, colL + 12, y + 64);
+    ctx.fillText(`• ต.ค. (${state.annualR2.toFixed(1)}%): +${annual.round2.roundedIncrease.toLocaleString()} บ.  ➔  เงินเดือน ${formatCurrency(annual.round2.newSalaryBase)} บ.`, colL + 12, y + 96);
 
-    ctx.fillStyle = accentColor;
-    ctx.font = 'bold 16px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`รวมทั้งปี +${formatCurrency(annual.annualIncrease)} บ.`, colR - 14, y + 62);
+    ctx.fillStyle = '#34D399';
+    ctx.font = 'bold 21px "SF Mono", monospace';
+    ctx.fillText(`รวมทั้งปี +${formatCurrency(annual.annualIncrease)} บ.`, colR - 12, y + 64);
 
-    y += 120;
+    y += annH + 16;
   }
 
-  // 7. ท้ายสลิป
+  // 7. ตราประทับและข้อความทางการด้านล่าง (Official Hallmark & Security Footer)
+  y += 24;
   const today = new Date().toLocaleDateString('th-TH', {
     year: 'numeric',
-    month: 'short',
+    month: 'long',
     day: 'numeric'
   });
-  ctx.fillStyle = '#718096';
-  ctx.font = '13px "Sarabun", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(`ประมาณการ ณ วันที่ ${today} • อ้างอิงเกณฑ์ ก.ค.ศ. (ว 20/2561)`, logicalWidth / 2, y);
 
-  // ส่งออกรูป
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(colL + 40, y);
+  ctx.lineTo(colR - 40, y);
+  ctx.stroke();
+
+  y += 28;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '16px "Sarabun", sans-serif';
+  ctx.fillText(`ประมาณการ ณ วันที่ ${today} • อ้างอิงตามหนังสือ ก.ค.ศ. ที่ ศธ 0206.7/ว 20 และ ว 8/2567`, logicalWidth / 2, y);
+
+  y += 22;
+  ctx.fillStyle = '#64748B';
+  ctx.font = '14px "Sarabun", sans-serif';
+  ctx.fillText('สูตรคำนวณ: ฐานคำนวณ × ร้อยละ ÷ 100 แล้วปัดเศษขึ้นเป็นจำนวนเต็มสิบบาทตามระเบียบทางราชการ', logicalWidth / 2, y);
+
+  // ส่งออกรูปภาพความละเอียดสูง
   canvas.toBlob((blob) => {
     if (!blob) return;
     state.activeShareBlob = blob;
 
-    // อัปเดตพรีวิวใน Modal เสมอ
     const url = URL.createObjectURL(blob);
     const modalImg = document.getElementById('modalPreviewImg');
     const imageModal = document.getElementById('imageModal');
@@ -1130,7 +1314,7 @@ async function handleExportImage() {
     if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
-        title: 'สลิปประมาณการเงินเดือนครู ก.ค.ศ.'
+        title: 'สลิปประมาณการเงินเดือนครู ก.ค.ศ. (ธาราคำนวณ)'
       }).then(() => {
         showToast('แชร์รูปสลิปเรียบร้อยแล้ว');
       }).catch((err) => {
@@ -1145,7 +1329,7 @@ async function handleExportImage() {
     downloadBlob(blob);
     showToast('ดาวน์โหลดรูปสลิปเรียบร้อยแล้ว');
 
-    // ถ้าเป็น In-App browser หรืออุปกรณ์ที่อาจไม่เริ่มดาวน์โหลด ให้เปิด Modal ไว้สำรอง
+    // ถ้าเป็น In-App browser หรือเปิดบนโมบายล์ ให้แสดงหน้าต่างพรีวิว
     if (isMobile && imageModal) {
       imageModal.style.display = 'flex';
     }
@@ -1183,6 +1367,20 @@ function roundRect(ctx, x, y, width, height, radius) {
 
 let deferredPrompt = null;
 function setupPWA() {
+  const btnInstall = document.getElementById('btnInstallApp');
+
+  // ตรวจจับว่าอยู่ในโหมด Standalone หรือเคยติดตั้งแล้วหรือไม่
+  let isInstalled = false;
+  try {
+    isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                  window.navigator.standalone === true ||
+                  localStorage.getItem('pwa_app_installed') === 'true';
+  } catch (e) {}
+
+  if (isInstalled && btnInstall) {
+    btnInstall.style.display = 'none';
+  }
+
   // 1. ลงทะเบียน Service Worker เมื่อรันบน HTTPS หรือ Localhost
   if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     window.addEventListener('load', () => {
@@ -1193,10 +1391,23 @@ function setupPWA() {
   }
 
   // 2. ดักจับ beforeinstallprompt เพื่อเชื่อมปุ่มติดตั้งแอป
-  const btnInstall = document.getElementById('btnInstallApp');
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
+    if (btnInstall && !isInstalled) {
+      btnInstall.style.display = 'inline-flex';
+    }
+  });
+
+  // 3. เมื่อผู้ใช้ติดตั้งแอปเสร็จสิ้น ให้ซ่อนปุ่มทันที
+  window.addEventListener('appinstalled', () => {
+    try {
+      localStorage.setItem('pwa_app_installed', 'true');
+    } catch (e) {}
+    if (btnInstall) {
+      btnInstall.style.display = 'none';
+    }
+    showToast('ติดตั้งแอปธาราคำนวณเรียบร้อยแล้ว');
   });
 
   if (btnInstall) {
@@ -1205,6 +1416,10 @@ function setupPWA() {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
+          try {
+            localStorage.setItem('pwa_app_installed', 'true');
+          } catch (e) {}
+          btnInstall.style.display = 'none';
           showToast('ติดตั้งแอปธาราคำนวณเรียบร้อยแล้ว');
         }
         deferredPrompt = null;
