@@ -1168,13 +1168,19 @@ body {
 
 .ledger-footer-note {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 0.775rem;
+  line-height: 1.5;
   color: var(--text-muted);
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--border-subtle);
+}
+
+.ledger-footer-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .ledger-footer-note code {

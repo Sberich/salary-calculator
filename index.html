@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="th" data-theme="warm">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ธาราคำนวณ • คำนวณเงินเดือนข้าราชการครู (ก.ค.ศ.)</title>
-  <meta name="description" content="โปรแกรมประมาณการและวางแผนเงินเดือนครู เกณฑ์ ก.ค.ศ. ว 20/2561 ฉบับพงไพรและธาราธรรมชาติ">
+  <meta name="description"
+    content="โปรแกรมประมาณการและวางแผนเงินเดือนครู เกณฑ์ ก.ค.ศ. ว 20/2561 ฉบับพงไพรและธาราธรรมชาติ">
   <meta name="theme-color" content="#F3F7F5" id="metaThemeColor">
-  
+
   <!-- ป้องกัน Theme Flash (FOUC) ก่อน Render -->
   <script>
-    (function() {
+    (function () {
       try {
         var t = localStorage.getItem('teacher_salary_theme');
         if (t === 'nordic' || t === 'warm') {
@@ -17,12 +19,12 @@
           var m = document.getElementById('metaThemeColor');
           if (m) m.setAttribute('content', t === 'nordic' ? '#0B1713' : '#F3F7F5');
         }
-      } catch (e) {}
+      } catch (e) { }
       try {
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true || localStorage.getItem('pwa_app_installed') === 'true') {
           document.documentElement.classList.add('pwa-standalone');
         }
-      } catch (e) {}
+      } catch (e) { }
     })();
   </script>
 
@@ -35,23 +37,25 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="icon" href="icons/icon-192.png">
 </head>
+
 <body>
 
   <!-- Background Nature Ambience (Wave Topography) -->
   <div class="nature-bg-layer" aria-hidden="true"></div>
 
   <div class="app-container">
-    
+
     <!-- 1. Header Bar: ธรรมชาติ ป่าเขา ลำธาร -->
     <header class="nature-header">
       <div class="brand-group">
         <div class="brand-emblem" aria-hidden="true">
           <!-- Nature SVG: Mountain + River + Forest Leaf -->
           <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-            <path d="M4 24L11 11L18 24H4Z" fill="currentColor" fill-opacity="0.35"/>
-            <path d="M14 24L20 14L26 24H14Z" fill="currentColor" fill-opacity="0.6"/>
-            <path d="M2 27C8 25 12 28 18 26C24 24 27 27 30 26" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M19 6C19 6 22 8 22 11C22 13 20 14 19 14C18 14 16 13 16 11C16 8 19 6 19 6Z" fill="#10B981"/>
+            <path d="M4 24L11 11L18 24H4Z" fill="currentColor" fill-opacity="0.35" />
+            <path d="M14 24L20 14L26 24H14Z" fill="currentColor" fill-opacity="0.6" />
+            <path d="M2 27C8 25 12 28 18 26C24 24 27 27 30 26" stroke="#38BDF8" stroke-width="2.5"
+              stroke-linecap="round" />
+            <path d="M19 6C19 6 22 8 22 11C22 13 20 14 19 14C18 14 16 13 16 11C16 8 19 6 19 6Z" fill="#10B981" />
           </svg>
         </div>
         <div class="brand-info">
@@ -61,17 +65,22 @@
           </div>
         </div>
       </div>
-      
+
       <div class="header-tools">
         <!-- ปุ่มติดตั้งแอป (PWA Standalone เต็มจอไร้แถบ URL) -->
-        <button type="button" id="btnInstallApp" class="tool-btn install-btn" title="ติดตั้งแอปบนมือถือ (เต็มจอไร้แถบ URL)">
+        <button type="button" id="btnInstallApp" class="tool-btn install-btn"
+          title="ติดตั้งแอปบนมือถือ (เต็มจอไร้แถบ URL)">
           <span class="btn-icon">📲</span>
           <span class="btn-text">ติดตั้งแอป</span>
         </button>
 
         <!-- ปุ่มเปิดตารางเกณฑ์ -->
         <button type="button" id="btnOpenCriteria" class="tool-btn" title="ดูตารางเกณฑ์ ก.ค.ศ. (ว 20/2561)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
           <span class="btn-text">เกณฑ์ ก.ค.ศ.</span>
         </button>
 
@@ -97,13 +106,17 @@
               <span id="slipRankTitle" class="hero-pill-rank">คศ. 2 ครูชำนาญการ</span>
               <span id="bracketBadge" class="hero-pill-bracket lower">
                 <span class="bracket-icon-box" aria-hidden="true" id="bracketIcon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c3-2 6-2 9 0s6 2 9 0"></path><path d="M2 17c3-2 6-2 9 0s6 2 9 0"></path></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12c3-2 6-2 9 0s6 2 9 0"></path>
+                    <path d="M2 17c3-2 6-2 9 0s6 2 9 0"></path>
+                  </svg>
                 </span>
                 <span id="bracketText">ฐานล่าง</span>
               </span>
             </div>
           </div>
-          
+
           <div class="hero-number-wrap">
             <span class="currency-symbol">฿</span>
             <span id="slipGrandTotal" class="hero-grand-number">34,610.00</span>
@@ -134,11 +147,19 @@
 
           <div class="hero-actions-group">
             <button type="button" id="btnExportImage" class="action-btn-nature primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
               <span>บันทึกรูปภาพ</span>
             </button>
             <button type="button" id="btnCopySummary" class="action-btn-nature secondary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
               <span>คัดลอกสรุป</span>
             </button>
           </div>
@@ -148,19 +169,22 @@
 
     <!-- 3. Nature Workspace: 2 คอลัมน์แบบสตูดิโอธรรมชาติ (Parameters & Ledger) -->
     <main class="nature-workspace">
-      
+
       <!-- โซนที่ 1: พารามิเตอร์การประเมิน (Input Parameters - เปิด/ปิดพับซ่อนได้) -->
       <section class="nature-card" id="paramsCard" aria-labelledby="sectionParamsTitle">
-        <div class="card-head card-head-interactive" id="paramsCardHead" role="button" tabindex="0" aria-expanded="true" aria-controls="paramsCardBody" title="แตะเพื่อเปิด/ปิด ข้อมูลการประเมิน">
+        <div class="card-head card-head-interactive" id="paramsCardHead" role="button" tabindex="0" aria-expanded="true"
+          aria-controls="paramsCardBody" title="แตะเพื่อเปิด/ปิด ข้อมูลการประเมิน">
           <div class="card-head-title">
             <span class="card-head-icon" aria-hidden="true">🌲</span>
             <h2 id="sectionParamsTitle" class="card-heading">ข้อมูลการประเมิน</h2>
             <!-- ป้ายสรุปย่อแสดงเมื่อกดพับซ่อน แทนที่หัวข้อ -->
-            <span id="paramsSummaryBadge" class="params-summary-badge" style="display: none;">คศ. 2 • 30,200 บ. • 3.0%</span>
+            <span id="paramsSummaryBadge" class="params-summary-badge" style="display: none;">คศ. 2 • 30,200 บ. •
+              3.0%</span>
           </div>
-          
+
           <div class="card-head-actions">
-            <button type="button" id="btnToggleParams" class="card-toggle-pill" aria-label="สลับการแสดงข้อมูลการประเมิน">
+            <button type="button" id="btnToggleParams" class="card-toggle-pill"
+              aria-label="สลับการแสดงข้อมูลการประเมิน">
               <span id="paramsToggleText" class="toggle-text">ซ่อน</span>
               <span id="paramsToggleIcon" class="toggle-icon" aria-hidden="true">▲</span>
             </button>
@@ -168,16 +192,17 @@
         </div>
 
         <div class="card-body collapsible-body" id="paramsCardBody">
-          
+
           <!-- พารามิเตอร์ 1: อันดับวิทยฐานะ -->
           <div class="param-block">
             <label class="param-label" for="rankPickerBtn">
               <span class="param-num">1</span>
               <span>อันดับ / วิทยฐานะ</span>
             </label>
-            
+
             <!-- Custom River Stone Rank Trigger -->
-            <div class="nature-rank-trigger" id="rankPickerBtn" role="button" tabindex="0" aria-label="เลือกอันดับวิทยฐานะ" aria-haspopup="dialog">
+            <div class="nature-rank-trigger" id="rankPickerBtn" role="button" tabindex="0"
+              aria-label="เลือกอันดับวิทยฐานะ" aria-haspopup="dialog">
               <div class="rank-trigger-details">
                 <span class="rank-badge-emerald" id="selectedRankPill">คศ. 2</span>
                 <span class="rank-title-text" id="selectedRankTitle">ครูชำนาญการ</span>
@@ -185,7 +210,10 @@
               <div class="rank-trigger-sub">
                 <span class="rank-allowance-tag" id="selectedRankAllowance">+3,500 บ.</span>
                 <span class="trigger-chevron" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
                 </span>
               </div>
             </div>
@@ -211,14 +239,8 @@
             </label>
 
             <div class="currency-box">
-              <input 
-                type="text" 
-                id="salaryInput" 
-                class="nature-input-currency" 
-                value="30,200" 
-                inputmode="numeric" 
-                aria-label="เงินเดือนปัจจุบัน"
-              >
+              <input type="text" id="salaryInput" class="nature-input-currency" value="30,200" inputmode="numeric"
+                aria-label="เงินเดือนปัจจุบัน">
               <span class="currency-affix">บาท</span>
             </div>
 
@@ -242,7 +264,7 @@
                 <span class="param-num">3</span>
                 <span>ร้อยละที่ได้เลื่อน</span>
               </label>
-              
+
               <!-- สลับโหมด: รอบเดี่ยว vs ทั้งปี -->
               <div class="cycle-mode-pill">
                 <button type="button" id="modeSingleBtn" class="cycle-tab active">รอบเดี่ยว</button>
@@ -261,28 +283,11 @@
 
             <!-- Slider + Numeric Input -->
             <div class="nature-slider-box">
-              <input 
-                type="range" 
-                id="percentSlider" 
-                class="nature-range" 
-                min="0.5" 
-                max="6.0" 
-                step="0.05" 
-                value="3.0"
-                aria-label="แถบปรับร้อยละ"
-              >
+              <input type="range" id="percentSlider" class="nature-range" min="0.5" max="6.0" step="0.05" value="3.0"
+                aria-label="แถบปรับร้อยละ">
               <div class="percent-input-wrapper">
-                <input 
-                  type="number" 
-                  id="percentInput" 
-                  class="nature-percent-input" 
-                  min="0" 
-                  max="6" 
-                  step="0.01" 
-                  value="3.00"
-                  inputmode="decimal"
-                  aria-label="กรอกร้อยละ"
-                >
+                <input type="number" id="percentInput" class="nature-percent-input" min="0" max="6" step="0.01"
+                  value="3.00" inputmode="decimal" aria-label="กรอกร้อยละ">
                 <span class="percent-mark">%</span>
               </div>
             </div>
@@ -294,14 +299,16 @@
                 <div class="sub-input-group">
                   <label for="annualR1Input">รอบ 1 (1 เม.ย.)</label>
                   <div class="input-with-pct">
-                    <input type="number" id="annualR1Input" min="0" max="6" step="0.01" value="3.00" inputmode="decimal">
+                    <input type="number" id="annualR1Input" min="0" max="6" step="0.01" value="3.00"
+                      inputmode="decimal">
                     <span>%</span>
                   </div>
                 </div>
                 <div class="sub-input-group">
                   <label for="annualR2Input">รอบ 2 (1 ต.ค.)</label>
                   <div class="input-with-pct">
-                    <input type="number" id="annualR2Input" min="0" max="6" step="0.01" value="3.00" inputmode="decimal">
+                    <input type="number" id="annualR2Input" min="0" max="6" step="0.01" value="3.00"
+                      inputmode="decimal">
                     <span>%</span>
                   </div>
                 </div>
@@ -313,17 +320,18 @@
         </div>
       </section>
 
-      <!-- โซนที่ 2: บัญชีแจกแจงเงินเดือน (Natural Alpine Ledger - เปิด/ปิดพับซ่อนได้ เริ่มต้นซ่อนไว้) -->
+      <!-- โซนที่ 2: บัญชีเงินเดือน (Natural Alpine Ledger - เปิด/ปิดพับซ่อนได้ เริ่มต้นซ่อนไว้) -->
       <section class="nature-card" id="ledgerCard" aria-labelledby="sectionLedgerTitle">
-        <div class="card-head card-head-interactive" id="ledgerCardHead" role="button" tabindex="0" aria-expanded="false" aria-controls="ledgerCardBody" title="แตะเพื่อเปิด/ปิด บัญชีแจกแจงเงินเดือน">
+        <div class="card-head card-head-interactive" id="ledgerCardHead" role="button" tabindex="0"
+          aria-expanded="false" aria-controls="ledgerCardBody" title="แตะเพื่อเปิด/ปิด บัญชีเงินเดือน">
           <div class="card-head-title">
             <span class="card-head-icon" aria-hidden="true">🌿</span>
-            <h2 id="sectionLedgerTitle" class="card-heading">บัญชีแจกแจงเงินเดือน</h2>
+            <h2 id="sectionLedgerTitle" class="card-heading">บัญชีเงินเดือน</h2>
             <span class="card-head-badge">ว 20/2561</span>
           </div>
-          
+
           <div class="card-head-actions">
-            <button type="button" id="btnToggleLedger" class="card-toggle-pill" aria-label="สลับการแสดงบัญชีแจกแจงเงินเดือน">
+            <button type="button" id="btnToggleLedger" class="card-toggle-pill" aria-label="สลับการแสดงบัญชีเงินเดือน">
               <span id="ledgerToggleText" class="toggle-text">แสดง</span>
               <span id="ledgerToggleIcon" class="toggle-icon" aria-hidden="true">▼</span>
             </button>
@@ -332,7 +340,7 @@
 
         <div class="card-body collapsible-body collapsed" id="ledgerCardBody" style="display: none;">
           <div class="nature-ledger">
-            
+
             <div class="ledger-row">
               <span class="ledger-label">ฐานคำนวณที่ใช้</span>
               <span class="ledger-value" id="slipBase">30,200.00 บ.</span>
@@ -341,7 +349,10 @@
             <div class="ledger-row highlight-green">
               <span class="ledger-label">
                 <span class="flow-indicator" aria-hidden="true" id="ledgerIncIcon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                  </svg>
                 </span>
                 <span>เงินที่ได้เลื่อนขั้น</span>
               </span>
@@ -402,8 +413,13 @@
 
           <!-- ท้ายการ์ดแจกแจง -->
           <div class="ledger-footer-note">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            <span>สูตรคำนวณ: <code>ฐานคำนวณ × ร้อยละ ÷ 100</code> แล้วปัดเศษขึ้นเป็นจำนวนเต็มสิบบาท</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>สูตรคำนวณ: <code>ฐานคำนวณ × ร้อยละ ÷ 100</code><br>แล้วปัดเศษขึ้นเป็นจำนวนเต็มสิบบาท</span>
           </div>
         </div>
       </section>
@@ -412,14 +428,16 @@
 
     <!-- Footer -->
     <footer class="nature-footer">
-      <p class="footer-legal">ประมาณการเงินเดือนข้าราชการครูและบุคลากรทางการศึกษา • อ้างอิงตามหนังสือ ก.ค.ศ. ที่ ศธ 0206.7/ว 20 และ ว 8/2567</p>
+      <p class="footer-legal">ประมาณการเงินเดือนข้าราชการครูและบุคลากรทางการศึกษา • อ้างอิงตามหนังสือ ก.ค.ศ. ที่ ศธ
+        0206.7/ว 20 และ ว 8/2567</p>
     </footer>
 
     <!-- Hidden Canvas สำหรับสร้างรูปภาพสลิปความละเอียดสูง (2x Retina) -->
     <canvas id="exportCanvas" class="visually-hidden" width="1600" height="1680" aria-hidden="true"></canvas>
 
     <!-- Modal 1: เลือกอันดับวิทยฐานะ (#rankSheetModal) -->
-    <div id="rankSheetModal" class="nature-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rankSheetTitle" style="display: none;">
+    <div id="rankSheetModal" class="nature-modal-backdrop" role="dialog" aria-modal="true"
+      aria-labelledby="rankSheetTitle" style="display: none;">
       <div class="nature-modal-card rank-sheet-card">
         <div class="modal-header">
           <div class="modal-header-left">
@@ -430,7 +448,7 @@
         </div>
         <div class="modal-body">
           <div class="rank-options-grid" id="rankSheetList" role="listbox">
-            
+
             <!-- ครูผู้ช่วย -->
             <div class="rank-option-item rank-sheet-item" data-rank="assistant" role="option">
               <div class="option-main">
@@ -509,7 +527,8 @@
     </div>
 
     <!-- Modal 2: ตารางเกณฑ์ ก.ค.ศ. (#criteriaModal) -->
-    <div id="criteriaModal" class="nature-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="criteriaTitle" style="display: none;">
+    <div id="criteriaModal" class="nature-modal-backdrop" role="dialog" aria-modal="true"
+      aria-labelledby="criteriaTitle" style="display: none;">
       <div class="nature-modal-card criteria-card">
         <div class="modal-header">
           <div class="modal-header-left">
@@ -520,7 +539,8 @@
         </div>
         <div class="modal-body">
           <p class="modal-desc">
-            ตารางอ้างอิงตามประกาศ ก.ค.ศ. การเลื่อนเงินเดือนแบบร้อยละ โดยกำหนดฐานคำนวณ 2 ช่วง (ช่วงล่างและช่วงบน) โดยมีจุดตัด (Cut-off) ดังนี้:
+            ตารางอ้างอิงตามประกาศ ก.ค.ศ. การเลื่อนเงินเดือนแบบร้อยละ โดยกำหนดฐานคำนวณ 2 ช่วง (ช่วงล่างและช่วงบน)
+            โดยมีจุดตัด (Cut-off) ดังนี้:
           </p>
 
           <div class="table-responsive">
@@ -613,7 +633,8 @@
     </div>
 
     <!-- Modal 3: พรีวิวและแชร์รูปภาพสลิป (#imageModal) -->
-    <div id="imageModal" class="nature-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle" style="display: none;">
+    <div id="imageModal" class="nature-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle"
+      style="display: none;">
       <div class="nature-modal-card image-preview-card">
         <div class="modal-header">
           <div class="modal-header-left">
@@ -628,11 +649,23 @@
           </div>
           <div class="image-modal-actions">
             <button type="button" id="btnModalDownloadDirect" class="action-btn-nature primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
               <span>ดาวน์โหลดรูปภาพ</span>
             </button>
             <button type="button" id="btnModalShare" class="action-btn-nature secondary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
               <span>แชร์รูปภาพ</span>
             </button>
           </div>
@@ -648,4 +681,5 @@
   <!-- โหลดสคริปต์แบบ Standalone -->
   <script src="js/app.js"></script>
 </body>
+
 </html>
