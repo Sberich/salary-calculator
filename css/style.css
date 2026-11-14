@@ -387,6 +387,15 @@ body {
   white-space: nowrap !important;
 }
 
+.hero-delta-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  flex-wrap: nowrap !important;
+}
+
 .hero-increment-chip {
   display: inline-flex;
   align-items: center;
@@ -397,20 +406,60 @@ body {
   font-size: 0.825rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   white-space: nowrap !important;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .chip-spark {
   color: #FBBF24;
   font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .hero-increment-chip strong {
   color: #FFFFFF;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .percent-tag {
   color: var(--hero-text-sub);
+  white-space: nowrap;
+}
+
+/* ปุ่มบันทึกรูปภาพ: ไอคอนกล้องเดี่ยวขนาดใหญ่ ไร้กรอบแคปซูล ไม่เอาตัวหนังสือ */
+.hero-save-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: #FFFFFF;
+  opacity: 0.92;
+  flex-shrink: 0;
+  line-height: 1;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-save-icon-btn:hover {
+  opacity: 1;
+  color: #6EE7B7;
+  transform: scale(1.18) translateY(-1px);
+  filter: drop-shadow(0 0 8px rgba(110, 231, 183, 0.65));
+}
+
+.hero-save-icon-btn:active {
+  transform: scale(0.92);
+}
+
+.hero-save-icon-btn svg {
+  width: 25px;
+  height: 25px;
+  display: block;
 }
 
 /* Side Metrics Box (Glassmorphic) */
@@ -1534,9 +1583,22 @@ body {
     background: transparent !important;
     border: none !important;
   }
+  .hero-delta-row {
+    gap: 7px;
+    flex-wrap: nowrap !important;
+  }
   .hero-increment-chip {
     font-size: 0.775rem;
-    padding: 4px 10px;
+    padding: 4px 9px;
+    gap: 4px;
+    white-space: nowrap !important;
+  }
+  .hero-save-icon-btn {
+    padding: 3px 5px;
+  }
+  .hero-save-icon-btn svg {
+    width: 24px;
+    height: 24px;
   }
   .metric-glass-box {
     padding: 10px 12px;
@@ -1615,5 +1677,30 @@ body {
   @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-delta-row {
+    gap: 5px;
+    flex-wrap: nowrap !important;
+  }
+  .hero-increment-chip {
+    font-size: 0.72rem !important;
+    padding: 3px 6px !important;
+    gap: 3px !important;
+  }
+  .hero-increment-chip strong {
+    font-size: 0.72rem !important;
+  }
+  .hero-increment-chip .percent-tag {
+    font-size: 0.68rem !important;
+  }
+  .hero-save-icon-btn {
+    padding: 2px 4px;
+  }
+  .hero-save-icon-btn svg {
+    width: 22px;
+    height: 22px;
   }
 }
