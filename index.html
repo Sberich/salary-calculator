@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="warm">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบคำนวณเงินเดือนครูและวิทยฐานะ (ก.ค.ศ.) | ครูไทย ยุคใหม่</title>
+  <meta name="description" content="โปรแกรมคำนวณเงินเดือนครูยุคใหม่ คำนวณร้อยละการเลื่อนขั้น เงินวิทยฐานะ และค่าตอบแทนพิเศษตามเกณฑ์ ก.ค.ศ. พร้อมออกสลิปจำลอง">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="header-bar">
+      <div class="brand-wrapper">
+        <div class="brand-icon">🎓</div>
+        <div>
+          <h1 class="brand-title">คำนวณเงินเดือนครู</h1>
+          <p class="brand-subtitle">ตามเกณฑ์การเลื่อนเงินเดือนและวิทยฐานะ ก.ค.ศ.</p>
+        </div>
+      </div>
+      
+      <!-- Theme Switcher -->
+      <button id="themeToggleBtn" class="theme-switch-btn" title="คลิกเพื่อเปลี่ยนโทนสี">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">ธีม: Warm Editorial</span>
+      </button>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="main-grid">
+      
+      <!-- Left Column: Controls & Inputs -->
+      <div class="panel-card">
+        
+        <!-- Step 1: Select Rank -->
+        <section aria-labelledby="step1-title">
+          <div class="section-label" id="step1-title">
+            <span class="step-num">1</span>
+            <span>เลือกอันดับ / วิทยฐานะ</span>
+          </div>
+          
+          <div class="rank-grid" id="rankGrid" role="radiogroup" aria-label="อันดับวิทยฐานะ">
+            <!-- Will be populated by app.js or rendered static for fast load -->
+            <div class="rank-card" data-rank="assistant" role="radio" aria-checked="false" tabindex="0">
+              <span class="rank-code">ครูผู้ช่วย</span>
+              <span class="rank-desc">แรกบรรจุ</span>
+              <span class="rank-allowance">ไม่มีเงินประจำตำแหน่ง</span>
+            </div>
+            
+            <div class="rank-card" data-rank="k1" role="radio" aria-checked="false" tabindex="0">
+              <span class="rank-code">คศ. 1</span>
+              <span class="rank-desc">ครูผู้สอน</span>
+              <span class="rank-allowance">ไม่มีเงินประจำตำแหน่ง</span>
+            </div>
+
+            <div class="rank-card" data-rank="k2" role="radio" aria-checked="false" tabindex="0">
+              <span class="rank-code">คศ. 2</span>
+              <span class="rank-desc">ชำนาญการ</span>
+              <span class="rank-allowance">+3,500 บ./ด.</span>
+            </div>
+
+            <div class="rank-card active" data-rank="k3" role="radio" aria-checked="true" tabindex="0">
+              <span class="rank-code">คศ. 3</span>
+              <span class="rank-desc">ชำนาญการพิเศษ</span>
+              <span class="rank-allowance">+11,200 บ./ด.</span>
+            </div>
+
+            <div class="rank-card" data-rank="k4" role="radio" aria-checked="false" tabindex="0">
+              <span class="rank-code">คศ. 4</span>
+              <span class="rank-desc">เชี่ยวชาญ</span>
+              <span class="rank-allowance">+19,800 บ./ด.</span>
+            </div>
+
+            <div class="rank-card" data-rank="k5" role="radio" aria-checked="false" tabindex="0">
+              <span class="rank-code">คศ. 5</span>
+              <span class="rank-desc">เชี่ยวชาญพิเศษ</span>
+              <span class="rank-allowance">+31,200 บ./ด.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 2: Current Salary -->
+        <section aria-labelledby="step2-title" class="input-wrapper">
+          <div class="section-label" id="step2-title">
+            <span class="step-num">2</span>
+            <span>เงินเดือนปัจจุบัน</span>
+          </div>
+          
+          <div class="input-container">
+            <input 
+              type="text" 
+              id="salaryInput" 
+              class="currency-input" 
+              value="42,000" 
+              inputmode="numeric" 
+              placeholder="ระบุเงินเดือนปัจจุบัน"
+              autocomplete="off"
+            >
+            <span class="currency-unit">บาท</span>
+          </div>
+
+          <!-- Live Range Detection Banner -->
+          <div class="base-status-banner">
+            <div>
+              <span style="color: var(--text-secondary)">ฐานคำนวณที่ใช้: </span>
+              <strong class="mono-num" id="baseSalaryDisplay" style="color: var(--text-primary)">49,330</strong> บาท
+            </div>
+            <div id="bracketBadge" class="badge-tag upper">
+              <span>●</span> <span id="bracketText">ช่วงบน</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 3: Increment Percentage -->
+        <section aria-labelledby="step3-title">
+          <div class="section-label" id="step3-title">
+            <span class="step-num">3</span>
+            <span>ร้อยละที่ได้รับการเลื่อนขั้น</span>
+          </div>
+
+          <!-- Quick Chips -->
+          <div class="chips-group" id="chipsGroup">
+            <button type="button" class="chip-btn" data-val="2.0">2.0%</button>
+            <button type="button" class="chip-btn" data-val="2.5">2.5%</button>
+            <button type="button" class="chip-btn active" data-val="3.0">3.0%</button>
+            <button type="button" class="chip-btn" data-val="3.5">3.5%</button>
+            <button type="button" class="chip-btn" data-val="4.0">4.0%</button>
+          </div>
+
+          <!-- Slider + Numeric Input -->
+          <div class="slider-container">
+            <input 
+              type="range" 
+              id="percentSlider" 
+              class="custom-range" 
+              min="0.5" 
+              max="6.0" 
+              step="0.05" 
+              value="3.0"
+            >
+            <div class="percent-display-box">
+              <input 
+                type="number" 
+                id="percentInput" 
+                class="percent-input-field" 
+                min="0" 
+                max="10" 
+                step="0.01" 
+                value="3.00"
+              >
+              <span class="percent-symbol">%</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Calculation Mode: Single vs Annual 2 Rounds -->
+        <div class="mode-toggle-bar">
+          <button type="button" id="modeSingleBtn" class="mode-tab active">
+            คำนวณรอบเดียว (ปัจจุบัน)
+          </button>
+          <button type="button" id="modeAnnualBtn" class="mode-tab">
+            จำลองทั้งปี 2 รอบ (เม.ย. / ต.ค.)
+          </button>
+        </div>
+
+        <!-- Annual simulation controls (hidden by default) -->
+        <div id="annualControls" class="annual-panel">
+          <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px;">กำหนดร้อยละแต่ละรอบ:</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="font-size: 0.775rem; color: var(--text-secondary)">รอบที่ 1 (1 เม.ย.):</label>
+              <input type="number" id="annualR1Input" class="percent-input-field mono-num" style="width: 100%; border: 1px solid var(--border-strong); border-radius: 6px; padding: 6px;" value="3.00" step="0.05">
+            </div>
+            <div>
+              <label style="font-size: 0.775rem; color: var(--text-secondary)">รอบที่ 2 (1 ต.ค.):</label>
+              <input type="number" id="annualR2Input" class="percent-input-field mono-num" style="width: 100%; border: 1px solid var(--border-strong); border-radius: 6px; padding: 6px;" value="3.00" step="0.05">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Digital Payslip Card -->
+      <div>
+        <div class="payslip-card" id="payslipElement">
+          
+          <!-- Payslip Header -->
+          <div class="payslip-header">
+            <div>
+              <div class="payslip-badge-title" id="slipRankTitle">ครูชำนาญการพิเศษ (คศ. 3)</div>
+              <div class="payslip-badge-sub">ผลการคำนวณการเลื่อนเงินเดือนจำลอง</div>
+            </div>
+            <div class="payslip-seal">ก.ค.ศ.</div>
+          </div>
+
+          <!-- Payslip Body -->
+          <div class="payslip-body">
+            
+            <div class="payslip-row">
+              <span class="label">ฐานในการคำนวณ:</span>
+              <span class="value mono-num" id="slipBase">49,330.00 บ.</span>
+            </div>
+
+            <div class="payslip-row highlight-row">
+              <span class="label">
+                <span>▲</span> เงินที่ได้เลื่อนขั้น (<span id="slipPercent">3.00</span>%):
+              </span>
+              <span class="value mono-num" id="slipIncrement">+1,480.00 บ.</span>
+            </div>
+
+            <hr class="payslip-divider">
+
+            <div class="payslip-row">
+              <span class="label">เงินเดือนใหม่ (เลื่อนขั้นแล้ว):</span>
+              <span class="value mono-num" id="slipNewBase">43,480.00 บ.</span>
+            </div>
+
+            <div class="payslip-row">
+              <span class="label">เงินวิทยฐานะ:</span>
+              <span class="value mono-num" id="slipAllowance">5,600.00 บ.</span>
+            </div>
+
+            <div class="payslip-row">
+              <span class="label">ค่าตอบแทนพิเศษรายเดือน:</span>
+              <span class="value mono-num" id="slipSpecial">5,600.00 บ.</span>
+            </div>
+
+            <div class="payslip-row" style="color: var(--text-secondary); font-size: 0.8rem;">
+              <span>รวมเงินประจำตำแหน่ง:</span>
+              <span class="mono-num" id="slipTotalAllowance">11,200.00 บ.</span>
+            </div>
+
+            <!-- Grand Total Box -->
+            <div class="payslip-grand-total">
+              <div class="total-title">รวมรายรับสุทธิโดยประมาณ</div>
+              <div class="total-number mono-num" id="slipGrandTotal">54,680.00</div>
+              <div class="total-unit">บาท / เดือน</div>
+            </div>
+
+            <!-- Annual projection rows (toggled by annual mode) -->
+            <div id="annualSummarySection" style="display: none; padding-top: 6px;">
+              <div class="annual-row">
+                <span style="color: var(--text-secondary)">เงินเดือนหลังรอบ เม.ย.:</span>
+                <strong class="mono-num" id="slipAnnualR1">43,480.00 บ.</strong>
+              </div>
+              <div class="annual-row">
+                <span style="color: var(--text-secondary)">เงินเดือนหลังรอบ ต.ค.:</span>
+                <strong class="mono-num" id="slipAnnualR2">44,960.00 บ.</strong>
+              </div>
+              <div class="annual-row" style="color: var(--accent-primary); font-weight: 600;">
+                <span>รวมเงินเดือนเพิ่มขึ้นตลอดทั้งปี:</span>
+                <span class="mono-num" id="slipAnnualTotalInc">+2,960.00 บ.</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Actions Toolbar -->
+          <div class="actions-bar">
+            <button type="button" id="btnExportImage" class="btn-primary" title="ดาวน์โหลดภาพสลิป">
+              <span>📷</span> บันทึกรูปภาพสลิป
+            </button>
+            <button type="button" id="btnCopySummary" class="btn-secondary" title="คัดลอกสรุปผลลัพธ์">
+              <span>📋</span> คัดลอกข้อความ
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Off-screen Canvas for High-Res Image Generation -->
+    <canvas id="exportCanvas" style="display: none;"></canvas>
+
+    <!-- Toast Notification -->
+    <div id="toastNotice" class="toast-notice" role="alert" aria-live="polite">
+      คัดลอกข้อความสรุปเรียบร้อยแล้ว
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>จัดทำเพื่ออำนวยความสะดวกแก่ข้าราชการครูและบุคลากรทางการศึกษา</p>
+      <p>* การคำนวณอ้างอิงตามระเบียบและหลักเกณฑ์การเลื่อนเงินเดือนของ ก.ค.ศ. (ปัดเศษขึ้นเต็มสิบบาท)</p>
+    </footer>
+
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
