@@ -391,39 +391,56 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
   flex-wrap: nowrap !important;
 }
 
+/* กล่องแคปซูลเงินเลื่อนรอบนี้: โดดเด่น สไตล์มรกตเรืองแสง ขยายยาวขึ้นทางขวา */
 .hero-increment-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.14);
-  padding: 5px 12px;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(6, 78, 59, 0.4) 100%);
+  border: 1.5px solid rgba(110, 231, 183, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 14px rgba(16, 185, 129, 0.25);
+  padding: 7px 20px;
   border-radius: var(--radius-full);
-  font-size: 0.825rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
   white-space: nowrap !important;
-  flex-shrink: 1;
+  flex: 0 1 auto;
+  max-width: 340px;
   min-width: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
 }
 
 .chip-spark {
   color: #FBBF24;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6));
   flex-shrink: 0;
 }
 
+.hero-increment-chip span:not(.percent-tag):not(.chip-spark) {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .hero-increment-chip strong {
-  color: #FFFFFF;
+  color: #6EE7B7;
   font-weight: 700;
+  font-size: 0.925rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 10px rgba(110, 231, 183, 0.45);
   white-space: nowrap;
 }
 
 .percent-tag {
-  color: var(--hero-text-sub);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.775rem;
   white-space: nowrap;
 }
 
@@ -1584,14 +1601,17 @@ body {
     border: none !important;
   }
   .hero-delta-row {
-    gap: 7px;
+    gap: 10px;
     flex-wrap: nowrap !important;
   }
   .hero-increment-chip {
-    font-size: 0.775rem;
-    padding: 4px 9px;
-    gap: 4px;
+    font-size: 0.8rem;
+    padding: 6px 16px;
+    gap: 7px;
     white-space: nowrap !important;
+  }
+  .hero-increment-chip strong {
+    font-size: 0.875rem;
   }
   .hero-save-icon-btn {
     padding: 3px 5px;
@@ -1682,19 +1702,19 @@ body {
 
 @media (max-width: 380px) {
   .hero-delta-row {
-    gap: 5px;
+    gap: 8px;
     flex-wrap: nowrap !important;
   }
   .hero-increment-chip {
-    font-size: 0.72rem !important;
-    padding: 3px 6px !important;
-    gap: 3px !important;
+    font-size: 0.74rem !important;
+    padding: 5px 12px !important;
+    gap: 5px !important;
   }
   .hero-increment-chip strong {
-    font-size: 0.72rem !important;
+    font-size: 0.8rem !important;
   }
   .hero-increment-chip .percent-tag {
-    font-size: 0.68rem !important;
+    font-size: 0.7rem !important;
   }
   .hero-save-icon-btn {
     padding: 2px 4px;
