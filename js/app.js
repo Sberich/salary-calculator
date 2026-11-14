@@ -301,24 +301,57 @@ function applyTheme(theme) {
 
   const meta = document.getElementById('metaThemeColor');
   if (meta) {
-    meta.setAttribute('content', valid === 'nordic' ? '#F0F4F8' : '#FAF7F2');
+    meta.setAttribute('content', valid === 'nordic' ? '#0A1612' : '#F2F6F4');
   }
 
   const icon = document.getElementById('themeIcon');
   const label = document.getElementById('themeLabel');
   if (icon && label) {
     if (valid === 'warm') {
-      icon.textContent = '☀️';
-      label.textContent = 'Warm';
-    } else {
       icon.textContent = '🌿';
-      label.textContent = 'Nordic';
+      label.textContent = 'ธาราหมอกเช้า';
+    } else {
+      icon.textContent = '🌲';
+      label.textContent = 'สนเขาสนธยา';
     }
   }
 }
 
 function toggleTheme() {
   applyTheme(state.theme === 'warm' ? 'nordic' : 'warm');
+}
+
+// ==========================================================================
+// 5.1 Custom Modern Rank Picker UI Sync
+// ==========================================================================
+function updateRankPickerUI(rankKey) {
+  const criteria = SALARY_CRITERIA[rankKey];
+  if (!criteria) return;
+
+  const pill = document.getElementById('selectedRankPill');
+  const title = document.getElementById('selectedRankTitle');
+  const allowance = document.getElementById('selectedRankAllowance');
+
+  if (pill) pill.textContent = criteria.name;
+  if (title) {
+    const rawTitle = criteria.title.replace(criteria.name, '').trim();
+    title.textContent = rawTitle || criteria.title;
+  }
+  if (allowance) {
+    const totalAllow = criteria.allowance + criteria.special;
+    allowance.textContent = totalAllow > 0 ? `+${integerFormatter.format(totalAllow)} บ.` : 'ไม่มีเงินประจำตำแหน่ง';
+  }
+
+  const items = document.querySelectorAll('.rank-sheet-item');
+  items.forEach(item => {
+    if (item.dataset.rank === rankKey) {
+      item.classList.add('active');
+      item.setAttribute('aria-selected', 'true');
+    } else {
+      item.classList.remove('active');
+      item.removeAttribute('aria-selected');
+    }
+  });
 }
 
 // ==========================================================================
@@ -448,11 +481,56 @@ function setupEventListeners() {
     };
   }
 
-  // ดรอปดาวน์เลือกวิทยฐานะ
+  // ดรอปดาวน์ / บอร์ดเลือกวิทยฐานะแบบโมเดิร์น
+  const rankPickerBtn = document.getElementById('rankPickerBtn');
+  const rankSheetModal = document.getElementById('rankSheetModal');
+  const btnCloseRankSheet = document.getElementById('btnCloseRankSheet');
+  const rankSheetItems = document.querySelectorAll('.rank-sheet-item');
   const rankSelect = document.getElementById('rankSelect');
+
+  if (rankPickerBtn && rankSheetModal) {
+    rankPickerBtn.onclick = () => {
+      rankSheetModal.style.display = 'flex';
+    };
+    rankPickerBtn.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        rankSheetModal.style.display = 'flex';
+      }
+    };
+  }
+
+  if (btnCloseRankSheet && rankSheetModal) {
+    btnCloseRankSheet.onclick = () => {
+      rankSheetModal.style.display = 'none';
+    };
+  }
+
+  if (rankSheetModal) {
+    rankSheetModal.onclick = (e) => {
+      if (e.target === rankSheetModal) {
+        rankSheetModal.style.display = 'none';
+      }
+    };
+  }
+
+  rankSheetItems.forEach(item => {
+    item.onclick = () => {
+      const rankKey = item.dataset.rank;
+      if (SALARY_CRITERIA[rankKey]) {
+        state.rankKey = rankKey;
+        if (rankSelect) rankSelect.value = rankKey;
+        updateRankPickerUI(rankKey);
+        if (rankSheetModal) rankSheetModal.style.display = 'none';
+        recalculate();
+      }
+    };
+  });
+
   if (rankSelect) {
     rankSelect.onchange = (e) => {
       state.rankKey = e.target.value;
+      updateRankPickerUI(state.rankKey);
       recalculate();
     };
   }
@@ -636,9 +714,10 @@ function copySummaryToClipboard() {
     day: 'numeric'
   });
 
-  let text = `📋 ประมาณการเงินเดือนครู (${res.rankName})\n`;
+  let text = `🌿 ธาราคำนวณ • ประมาณการเงินเดือนครู (${res.rankName})\n`;
   text += `📅 ณ ${dateStr}\n`;
   text += `─────────────────────\n`;
+  text += `• อันดับ / วิทยฐานะ: ${res.rankName} ${res.rankTitle}\n`;
   text += `• เงินเดือนเดิม: ${formatCurrency(res.currentSalary)} บ.\n`;
   text += `• ฐานคำนวณ: ${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})\n`;
   text += `• ร้อยละที่เลื่อน: ${res.percent.toFixed(2)}%\n`;
@@ -724,19 +803,19 @@ async function handleExportImage() {
   ctx.scale(scale, scale);
 
   const isWarm = state.theme === 'warm';
-  const bgColor = isWarm ? '#FAF7F2' : '#F0F4F8';
-  const cardColor = '#FFFFFF';
-  const headerBg = isWarm ? '#1E293B' : '#0F172A';
-  const primaryText = isWarm ? '#182230' : '#0F172A';
-  const secondaryText = isWarm ? '#4A5568' : '#334155';
-  const accentColor = isWarm ? '#B45309' : '#047857';
-  const totalNumColor = isWarm ? '#F59E0B' : '#10B981';
+  const bgColor = isWarm ? '#F2F6F4' : '#0A1612';
+  const cardColor = isWarm ? '#FFFFFF' : '#12231D';
+  const headerBg = isWarm ? '#064E3B' : '#0D261E';
+  const primaryText = isWarm ? '#122B22' : '#F0F7F4';
+  const secondaryText = isWarm ? '#3B584C' : '#A3C5B7';
+  const accentColor = isWarm ? '#059669' : '#10B981';
+  const totalNumColor = isWarm ? '#6EE7B7' : '#34D399';
 
   // 1. พื้นหลัง
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
-  // 2. การ์ดสีขาว
+  // 2. การ์ดสีขาว/เข้ม
   const pad = 32;
   const cardW = logicalWidth - (pad * 2);
   const cardH = logicalHeight - (pad * 2);
@@ -751,22 +830,22 @@ async function handleExportImage() {
   ctx.fill();
   ctx.restore();
 
-  // 3. หัวสลิป
+  // 3. หัวการ์ดธรรมชาติ
   ctx.save();
   roundRect(ctx, pad, pad, cardW, 110, { tl: r, tr: r, br: 0, bl: 0 });
   ctx.fillStyle = headerBg;
   ctx.fill();
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 28px "Prompt", sans-serif';
-  ctx.fillText(`${res.rankName} ${res.rankTitle}`, pad + 28, pad + 48);
+  ctx.font = 'bold 25px "Prompt", sans-serif';
+  ctx.fillText(`ธาราคำนวณ • ${res.rankName} ${res.rankTitle}`, pad + 28, pad + 48);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-  ctx.font = '16px "Sarabun", sans-serif';
-  ctx.fillText(`สลิปประมาณการเงินเดือน • เกณฑ์ ก.ค.ศ.`, pad + 28, pad + 80);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.font = '15px "Sarabun", sans-serif';
+  ctx.fillText(`สรุปประมาณการเงินเดือนครู • เกณฑ์ ก.ค.ศ. (ว 20/2561)`, pad + 28, pad + 80);
 
   // ตรา ก.ค.ศ.
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
   roundRect(ctx, pad + cardW - 110, pad + 35, 84, 32, 16);
   ctx.fill();
   ctx.fillStyle = '#FFFFFF';
@@ -782,7 +861,7 @@ async function handleExportImage() {
 
   function drawRow(label, value, isHighlight = false) {
     if (isHighlight) {
-      ctx.fillStyle = isWarm ? '#FEF3C7' : '#D1FAE5';
+      ctx.fillStyle = isWarm ? '#D1FAE5' : 'rgba(16, 185, 129, 0.18)';
       roundRect(ctx, colL - 6, y - 24, cardW - 44, 40, 8);
       ctx.fill();
 
@@ -791,7 +870,7 @@ async function handleExportImage() {
       ctx.textAlign = 'left';
       ctx.fillText(label, colL, y + 3);
 
-      ctx.font = 'bold 20px "JetBrains Mono", monospace';
+      ctx.font = 'bold 20px "SF Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText(value, colR, y + 3);
     } else {
@@ -801,7 +880,7 @@ async function handleExportImage() {
       ctx.fillText(label, colL, y);
 
       ctx.fillStyle = primaryText;
-      ctx.font = '600 18px "JetBrains Mono", monospace';
+      ctx.font = '600 18px "SF Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText(value, colR, y);
     }
@@ -811,18 +890,16 @@ async function handleExportImage() {
   drawRow('ฐานคำนวณ:', `${formatCurrency(res.baseSalary)} บ. (${res.isUpper ? 'ช่วงบน' : 'ช่วงล่าง'})`);
   drawRow(`▲ เงินเลื่อนขั้น (${res.percent.toFixed(2)}%):`, `+${formatCurrency(res.roundedIncrease)} บ.`, true);
 
-  // เส้นประคั่น
+  // เส้นแบ่งสายน้ำ
   y += 4;
-  ctx.strokeStyle = isWarm ? '#D4C7B5' : '#CBD5E1';
-  ctx.setLineDash([6, 5]);
+  ctx.strokeStyle = isWarm ? '#E1EBE5' : '#1F3D32';
   ctx.beginPath();
   ctx.moveTo(colL, y);
   ctx.lineTo(colR, y);
   ctx.stroke();
-  ctx.setLineDash([]);
   y += 30;
 
-  drawRow('เงินเดือนใหม่:', `${formatCurrency(res.newSalaryBase)} บ.`);
+  drawRow('เงินเดือนเนื้อแท้ใหม่:', `${formatCurrency(res.newSalaryBase)} บ.`);
   drawRow('เงินวิทยฐานะ:', `${formatCurrency(res.allowance)} บ.`);
   drawRow('ค่าตอบแทนพิเศษ:', `${formatCurrency(res.special)} บ.`);
   drawRow('รวมเงินประจำตำแหน่ง:', `${formatCurrency(res.totalAllowance)} บ.`);
@@ -832,20 +909,20 @@ async function handleExportImage() {
   // 5. กล่องยอดรวม
   const bannerH = 110;
   ctx.save();
-  roundRect(ctx, colL, y, cardW - 56, bannerH, 12);
-  ctx.fillStyle = headerBg;
+  roundRect(ctx, colL, y, cardW - 56, bannerH, 14);
+  ctx.fillStyle = isWarm ? '#064E3B' : '#0D261E';
   ctx.fill();
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
   ctx.font = '15px "Prompt", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('รวมรับก่อนหัก (ประมาณการ)', logicalWidth / 2, y + 32);
+  ctx.fillText('รวมรับรายเดือนโดยประมาณ', logicalWidth / 2, y + 32);
 
   ctx.fillStyle = totalNumColor;
-  ctx.font = 'bold 36px "JetBrains Mono", monospace';
+  ctx.font = 'bold 36px "Prompt", monospace';
   ctx.fillText(`${formatCurrency(res.grandTotal)}`, logicalWidth / 2, y + 72);
   ctx.font = '13px "Sarabun", sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
   ctx.fillText('บาท / เดือน', logicalWidth / 2, y + 94);
   ctx.restore();
 
@@ -967,6 +1044,7 @@ function roundRect(ctx, x, y, width, height, radius) {
 // ==========================================================================
 function init() {
   applyTheme(state.theme);
+  updateRankPickerUI(state.rankKey);
   setupEventListeners();
   recalculate();
 }
