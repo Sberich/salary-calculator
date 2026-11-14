@@ -352,6 +352,46 @@ function updateRankPickerUI(rankKey) {
       item.removeAttribute('aria-selected');
     }
   });
+
+  updateParamsSummaryBadge();
+}
+
+function updateParamsSummaryBadge() {
+  const badge = document.getElementById('paramsSummaryBadge');
+  if (!badge) return;
+  const criteria = SALARY_CRITERIA[state.rankKey];
+  const rName = criteria ? criteria.name : '';
+  badge.textContent = `${rName} • ${integerFormatter.format(state.salary)} บ. • ${state.percent.toFixed(1)}%`;
+}
+
+function toggleParams(force) {
+  const body = document.getElementById('paramsCardBody');
+  const toggleBtn = document.getElementById('btnToggleParams');
+  const toggleHead = document.getElementById('paramsCardHead');
+  const toggleText = document.getElementById('paramsToggleText');
+  const toggleIcon = document.getElementById('paramsToggleIcon');
+  const badge = document.getElementById('paramsSummaryBadge');
+  if (!body) return;
+
+  const willCollapse = typeof force === 'boolean' ? !force : !body.classList.contains('collapsed');
+  if (willCollapse) {
+    body.classList.add('collapsed');
+    if (toggleHead) toggleHead.setAttribute('aria-expanded', 'false');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+    if (toggleText) toggleText.textContent = 'ปรับข้อมูล';
+    if (toggleIcon) toggleIcon.textContent = '▼';
+    if (badge) {
+      updateParamsSummaryBadge();
+      badge.style.display = 'inline-block';
+    }
+  } else {
+    body.classList.remove('collapsed');
+    if (toggleHead) toggleHead.setAttribute('aria-expanded', 'true');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+    if (toggleText) toggleText.textContent = 'ซ่อน';
+    if (toggleIcon) toggleIcon.textContent = '▲';
+    if (badge) badge.style.display = 'none';
+  }
 }
 
 // ==========================================================================
@@ -360,6 +400,8 @@ function updateRankPickerUI(rankKey) {
 function recalculate() {
   const criteria = SALARY_CRITERIA[state.rankKey];
   if (!criteria) return;
+
+  updateParamsSummaryBadge();
 
   // 1. ตรวจสอบเพดานเงินเดือน
   const bounds = checkSalaryBounds(state.rankKey, state.salary);
@@ -452,6 +494,28 @@ function recalculate() {
 // 7. Event Listeners (ตรวจทานทุกปุ่มและเมนู 100%)
 // ==========================================================================
 function setupEventListeners() {
+  // เปิด/ปิด แผงข้อมูลการประเมิน (Collapsible)
+  const btnToggleParams = document.getElementById('btnToggleParams');
+  const paramsCardHead = document.getElementById('paramsCardHead');
+
+  if (btnToggleParams) {
+    btnToggleParams.onclick = (e) => {
+      e.stopPropagation();
+      toggleParams();
+    };
+  }
+  if (paramsCardHead) {
+    paramsCardHead.onclick = () => {
+      toggleParams();
+    };
+    paramsCardHead.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleParams();
+      }
+    };
+  }
+
   // สลับธีมสี
   const themeBtn = document.getElementById('themeToggleBtn');
   if (themeBtn) {

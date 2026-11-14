@@ -48,7 +48,6 @@
             <h1 class="brand-heading">ธาราคำนวณ</h1>
             <span class="nature-badge">ฉบับพงไพร</span>
           </div>
-          <p class="brand-desc">จำลองเงินเดือนข้าราชการครู • เกณฑ์ ก.ค.ศ. (ว 20/2561)</p>
         </div>
       </div>
       
@@ -131,17 +130,26 @@
     <!-- 3. Nature Workspace: 2 คอลัมน์แบบสตูดิโอธรรมชาติ (Parameters & Ledger) -->
     <main class="nature-workspace">
       
-      <!-- โซนที่ 1: พารามิเตอร์การประเมิน (Input Parameters) -->
-      <section class="nature-card" aria-labelledby="sectionParamsTitle">
-        <div class="card-head">
+      <!-- โซนที่ 1: พารามิเตอร์การประเมิน (Input Parameters - เปิด/ปิดพับซ่อนได้) -->
+      <section class="nature-card" id="paramsCard" aria-labelledby="sectionParamsTitle">
+        <div class="card-head card-head-interactive" id="paramsCardHead" role="button" tabindex="0" aria-expanded="true" aria-controls="paramsCardBody" title="แตะเพื่อเปิด/ปิด ข้อมูลการประเมิน">
           <div class="card-head-title">
             <span class="card-head-icon" aria-hidden="true">🌲</span>
             <h2 id="sectionParamsTitle" class="card-heading">ข้อมูลการประเมิน</h2>
           </div>
-          <span class="card-head-badge">ขั้นตอน 1–3</span>
+          
+          <div class="card-head-actions">
+            <!-- ป้ายสรุปย่อแสดงเมื่อกดพับซ่อน -->
+            <span id="paramsSummaryBadge" class="params-summary-badge" style="display: none;">คศ. 2 • 30,200 บ. • 3.0%</span>
+            
+            <button type="button" id="btnToggleParams" class="card-toggle-pill" aria-label="สลับการแสดงข้อมูลการประเมิน">
+              <span id="paramsToggleText" class="toggle-text">ซ่อน</span>
+              <span id="paramsToggleIcon" class="toggle-icon" aria-hidden="true">▲</span>
+            </button>
+          </div>
         </div>
 
-        <div class="card-body">
+        <div class="card-body collapsible-body" id="paramsCardBody">
           
           <!-- พารามิเตอร์ 1: อันดับวิทยฐานะ -->
           <div class="param-block">
